@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>定时任务管理</title>
+
+    <!-- Bootstrap core CSS JavaScript -->
+    <link href="/taskManage/libs/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/taskManage/libs/bootstrap-responsive.css" rel="stylesheet">
+    <script src="http://libs.baidu.com/jquery/1.10.2/jquery.min.js"></script>
+    <script src="/taskManage/libs/bootstrap.min.js"></script>
+
+    <!-- Bootstrap timePicker-->
+    <link href="/taskManage/libs/bootstrap-datetimepicker.min.css" rel="stylesheet">
+    <script src="/taskManage/libs/bootstrap-datetimepicker.js"></script>
+    <script src="/taskManage/libs/bootstrap-datetimepicker.zh-CN.js"></script>
+
+    <script src="/taskManage/js/taskManage.js"></script>
+
+    <style>textarea {resize:none;} .img-polaroid {height: 100%; border-radius: 10px; border: #e5e5e5 solid 2px;}</style>
+</head>
+<body>
+
+    <!-- 导航 -->
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="{{ url_for("task_show") }}">任务管理<span class="sr-only">(current)</span></a></li>
+            <li><a href="{{ url_for("log_show") }}">任务日志</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a style="cursor:pointer" data-toggle="modal" data-target="#changePassword"> 修改密码 </a></li>
+            <li><a href="{{ url_for('admin_logout') }}" class="navbar-link">退出登录</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主体 -->
+    <div>
+        <div class="container" style="margin-top: 0px;text-align:center">
+            <h2 class="text-center" style="margin-top: 0px">任务管理</h2>
+
+            <div class="text-right" style="margin: 10px 0px">
+                <!-- 搜索框 -->
+                <div class="row" style="float: left;padding-left: 30px">
+                    <div class="input-group" style="width: 200px">
+                      <input type="text" class="form-control" id="searchJobId" placeholder="请输入任务编号">
+                      <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" id="searchButton">搜索</button>
+                      </span>
+                    </div><!-- /input-group -->
+                </div><!-- /.row -->
+
+                <!-- 启动按钮 -->
+                {% if systemState == 0 %}
+                    <button type="button" class="btn btn-success btn " id="start-system-Bt" data-id=0>启动系统</button>
+                {% else %}
+                    <button type="button" class="btn btn-danger btn " id="stop-system-Bt" data-id=1>关闭系统</button>
+                {% endif %}
+
+                <!-- 新建按钮 -->
+                <button type="button" class="btn btn-default btn " data-toggle="modal" data-target="#infoModal" id="create-Manage-Bt">
+                  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>  新建
+                </button>
+            </div>
+            <!-- 表格 -->
+            <table class="table table-hover" style="text-align:left; table-layout: fixed">
+                <thead>
+                  <tr>
+                     <th>任务编号</th>
+                     <th>推送时间</th>
+                     <th>开始日期</th>
+                     <th>结束日期</th>
+                     <th>状态</th>
+                     <th>备注</th>
+                     <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for task in paginate.items %}
+                        {% if task.isTest == 0 %}
+                            <tr>
+                                <td>{{ task.jobId }}</td>
+                                <td>{{ task.pushTime }}</td>
+                                <td>{{ task.beginDate }}</td>
+                                <td>{{ task.endDate }}</td>
+                                <td>
+                                    {% if task.isRunning == 1 %}
+                                        <p style="color: green;">正在运行队列中</p>
+                                    {% else %}
+                                        {% if task.isRunning == 2 %}
+                                            <p style="color: blue">在队列中挂起</p>
+                                        {% else %}
+                                            <p style="color: red">不在运行队列中</p>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td style="white-space:nowrap;overflow:hidden;text-overflow: ellipsis;">
+                                    {{ task.description }}
+                                </td>
+                                <td>
+                                    {% if task.isRunning == 1 %}
+                                        <button type="button" class="btn btn-default btn-sm stop-button" data-id="{{ task._id }}"> 停止 </button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-default btn-sm start-button" data-id="{{ task._id }}" data-date="{{ task.endDate }}"> 开启 </button>
+                                    {% endif %}
+                                    <button type="button" class="btn btn-info btn-sm change-bic-button" data-toggle="modal" data-target="#infoModal" data-id="{{ task._id }}"> 修改 </button>
+                                    <br/>
+                                    <button type="button" class="btn btn-danger btn-sm delete-bic-button" data-id="{{ task._id }}"> 删除 </button>
+                                    <button type="button" class="btn btn-warning btn-sm push-test-button" data-toggle="modal" data-target="#testModal" data-id="{{ task._id }}"> 测试 </button>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- 分页 -->
+            <nav class="row text-center">
+              <div class="col-md-10 col-md-offset-1 pagination-container">
+                <ul class="pagination">
+                  {% if paginate.has_prev %}
+                  <li>
+                    <a href="{{ url_for('task_show', page=paginate.prev_num) }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                  </li>
+                  {% endif %}
+                  {% for page in paginate.iter_pages() %}
+                    {% if page %}
+                      {% if page==paginate.page %}
+                        <li class="active"><a >{{ page }}<span class="sr-only">(current)</span></a></li>
+                      {% else %}
+                        <li><a href="{{ url_for('task_show', page=page) }}">{{ page }}</a></li>
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                  {% if paginate.has_next %}
+                  <li>
+                    <a
+                      href="{{ url_for('task_show', page=paginate.next_num) }}" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </nav>
+            <!-- 分页 end -->
+        </div>
+    </div>
+
+    <!-- 任务信息表单 -->
+    <div class="modal fade" id="infoModal" tabindex="-1" role="dialog"
+       aria-labelledby="myModalLabel" aria-hidden="true">
+       <div class="modal-dialog">
+          <div class="modal-content">
+             <div class="modal-header">
+                <button type="button" class="close"
+                   data-dismiss="modal" aria-hidden="true">
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                    任务信息 - <span id="create-or-change"></span>
+                </h4>
+             </div>
+
+             <div class="modal-body">
+
+                  <input id="save_id" class="hidden" type="text"></inpt>
+
+                  <form class="form-horizontal">
+
+                      <div class="form-group" style="margin: 10px">
+                          <div class="form-group form-group-sm">
+                            <label class="col-sm-2 control-label">任务编号</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" placeholder="请输入任务编号" aria-describedby="basic-addon1" id="jobId" name="jobId" style="width: 420px">
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="form-group" style="margin: 10px">
+                          <div class="form-group form-group-sm">
+                            <label class="col-sm-2 control-label">推送时间</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" placeholder="(XX:XX:XX)" aria-describedby="basic-addon1" id="pushTime" name="pushTime" style="width: 420px">
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="form-group" style="margin: 10px">
+                          <div class="form-group form-group-sm">
+                            <label class="col-sm-2 control-label">起始日期</label>
+                            <div class="col-sm-10">
+                                <div class="input-group date form_date" data-date="" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1" data-link-format="yyyy-mm-dd" style="width: 420px">
+                                    <input class="form-control" type="text" id="beginDate" name="beginDate" value readonly>
+                                    <span class="input-group-addon" style="width: 20px">
+                                        <span class="glyphicon glyphicon-th"></span>
+                                    </span>
+                                </div>
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="form-group" style="margin: 10px">
+                          <div class="form-group form-group-sm">
+                            <label class="col-sm-2 control-label">结束日期</label>
+                            <div class="col-sm-10">
+                                <div class="input-group date form_date" data-date="" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1" data-link-format="yyyy-mm-dd" style="width: 420px">
+                                    <input class="form-control" type="text" id="endDate" name="endDate" value readonly>
+                                    <span class="input-group-addon" style="width: 20px">
+                                        <span class="glyphicon glyphicon-th"></span>
+                                    </span>
+                                </div>
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="form-group" style="margin: 10px">
+                          <div class="form-group form-group-sm">
+                            <label class="col-sm-2 control-label">函数命令</label>
+                            <div class="col-sm-10">
+                               <textarea class="form-control" type="text" name="command" style="height:80px;width: 420px" id="command"></textarea>
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="form-group" style="margin: 10px">
+                          <div class="form-group form-group-sm">
+                            <label class="col-sm-2 control-label">描&#8195述</label>
+                            <div class="col-sm-10">
+                               <textarea class="form-control" type="text" name="description" style="height:80px;width: 420px" id="description"></textarea>
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" style="float: right; margin-left: 20px">
+                           关闭
+                        </button>
+                        <button type="button" id="createBicBt" class="btn btn-primary" style="float: right">
+                           确定
+                        </button>
+                        <button type="button" id="updateBicBt" class="btn btn-primary" style="display: none; float: right">
+                           确定
+                        </button>
+                     </div>
+                  </form>
+               </div>
+             </div>
+          </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+
+    <!-- 测试表单 -->
+    <div class="modal fade" id="testModal" tabindex="-1" role="dialog"
+       aria-labelledby="myModalLabel" aria-hidden="true">
+       <div class="modal-dialog">
+          <div class="modal-content">
+             <div class="modal-header">
+                <button type="button" class="close"
+                   data-dismiss="modal" aria-hidden="true">
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                    推送测试
+                </h4>
+             </div>
+
+             <div class="modal-body">
+                  <input id="save_id" class="hidden" type="text"></inpt>
+                  <form class="form-horizontal">
+                      <div class="form-group" style="margin: 10px">
+                          <div class="form-group form-group-sm">
+                            <label class="col-sm-2 control-label">推送人ID</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" placeholder="请输入推送人OPENID" aria-describedby="basic-addon1" id="pushOpenId" name="pushOpenId" style="width: 420px">
+                            </div>
+                          </div>
+                      </div>
+
+                      <p style="color: red;text-align: center">* 现仅能对cron推送任务提供测试，如成功还在log中添加记录</p>
+
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" style="float: right; margin-left: 20px">
+                           关闭
+                        </button>
+                        <button type="button" id="sureTestBtn" class="btn btn-primary" style="float: right">
+                           测试
+                        </button>
+                     </div>
+                  </form>
+               </div>
+             </div>
+          </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+
+
+    <!-- 密码修改模态框 -->
+    <div class="modal fade" id="changePassword" tabindex="-1" role="dialog"
+       aria-labelledby="myModalLabel" aria-hidden="true">
+       <div class="modal-dialog">
+          <div class="modal-content">
+             <div class="modal-header">
+                <button type="button" class="close"
+                   data-dismiss="modal" aria-hidden="true">
+                      &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                   修改密码
+                </h4>
+             </div>
+
+             <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group" style="margin: 10px">
+                              <label>请输入旧密码</label>
+                              <input type="password" class="form-control" placeholder="请输入旧密码" aria-describedby="basic-addon1" id="userOldPwd" name="oldKey">
+                    </div>
+                    <div class="form-group" style="margin: 10px">
+                              <label>请输入新密码</label>
+                              <input type="password" class="form-control" placeholder="请输入新密码" aria-describedby="basic-addon1" id="userNewPwd" name="newKey">
+                    </div>
+                    <div class="form-group" style="margin: 10px">
+                              <label>请重复新密码</label>
+                              <input type="password" class="form-control" placeholder="请重复新密码" aria-describedby="basic-addon1" id="userNewPwdRepeat" name="reNewKey">
+                    </div>
+                </form>
+             </div>
+
+             <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                   关闭
+                </button>
+                <button type="button" id="sureChangePassword" class="btn btn-primary">
+                   确定
+                </button>
+             </div>
+          </div>
+       </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+
+</body>
+</html>
