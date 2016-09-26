@@ -22,4 +22,5 @@ flask/bin/pip install requests
 flask/bin/pip install mongoengine
 flask/bin/pip install flask-mongoengine
 flask/bin/pip install utils
+flask/bin/pip install lxml
 

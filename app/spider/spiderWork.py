@@ -3,6 +3,7 @@
 from app.models.spiderDataModel import YearFinished
 from config import (MIN_YEAR, SEARCH_PAGE, SEARCH_API)
 from spiderModel import Search
+from spiderParse import get_movie_pages,get_movie_ids
 
 def get_year():
     '''
@@ -40,6 +41,35 @@ def spider():
     y_list = []
     y = get_year() + 1
     instance = fetch(y, 1)
+    pages = get_movie_pages(instance)
+    if pages is None:
+        '''
+            可能被挡了，也可能这一页本来就没内容
+            (需要添加log，调整间断时间)
+        '''
+        pass
+    ids = get_movie_ids(instance)
+    if ids is None:
+        '''
+            可能被挡了，也可能这一页本来就没内容
+            (需要添加log，调整间断时间)
+        '''
+        pass
+
+    y_list.extend(ids)
+    if not y_list:
+        '''
+            这一年没有电影
+            (需要添加log)
+        '''
+        YearFinished(year=y).save()
+        '''
+            间隔时间，搜索下一年
+        '''
+        return spider()
+
+
+
 
 
 
