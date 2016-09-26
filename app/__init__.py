@@ -13,7 +13,6 @@ loginManager.init_app(app)
 loginManager.login_view='admin_login'
 
 from app.models.adminModel import User
-
 from app.routes import taskManageRoute
 from app.routes import logRoute
 from app.routes import adminRoute

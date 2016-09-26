@@ -27,11 +27,6 @@ def add_log(content,fromTask,parameter):
 
 
 
-
-
-
-
-
 #添加任务
 def add_task():
     try:

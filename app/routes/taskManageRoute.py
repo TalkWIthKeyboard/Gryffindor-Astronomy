@@ -43,8 +43,7 @@ def task_create():
                         command=request.form['command'],
                         description=request.form['description'],
                         updateTime=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        isRunning=0,
-                        isTest=0)
+                        isRunning=0)
             task.save()
             user = current_user
             log = Log(content='创建编号为 ' + str(task.jobId) + ' 的任务',
