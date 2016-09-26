@@ -45,23 +45,23 @@ class ContentEncodingProcessor(urllib2.BaseHandler):
         if self.cookiejar is not None:
             self.cookiejar.extract_cookies(resp , req)
         # 页面没有压缩
-        if resp.header.get("content-encoding") not in ('gzip', 'deflate'):
+        if resp.headers.get("content-encoding") not in ('gzip', 'deflate'):
             return  resp
         old_resp = resp
         content = resp.read()
 
         # gzip压缩
-        if resp.header.get("content-encoding") == 'gzip':
+        if resp.headers.get("content-encoding") == 'gzip':
             gz = GzipFile(
                 fileobj=StringIO(content),
                 mode="r"
             )
 
         # deflate压缩
-        elif resp.header.get("content-encoding") == 'deflate':
+        elif resp.headers.get("content-encoding") == 'deflate':
             gz = StringIO(deflate(content))
         resp = urllib2.addinfourl(
-            gz, old_resp.header, old_resp.url, old_resp.code)
+            gz, old_resp.headers, old_resp.url, old_resp.code)
         resp.msg = old_resp.msg
         return resp
 
