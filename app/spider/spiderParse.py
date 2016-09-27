@@ -3,7 +3,7 @@
 import re
 
 movie_regex = re.compile(r'http://movie.mtime.com/(\d+)/')
-movie_page_regex = re.compile(r'pageindex="(\d+)"')
+movie_page_regex = re.compile(r'pageindex=(\\)?"(\d+)(\\)?(\\)?"')
 # 这是mtime的防爬后的提示关键句
 mtime_vcodeValid_regex = re.compile(r'\"vcodeValid\":false,\"isRobot\":true')
 
@@ -29,4 +29,4 @@ def get_movie_ids(instance):
     if mtime_vcodeValid_regex.search(instance.content):
         print "被挡了~~~~"
         return
-    return movie_regex.search(instance.content)
+    return movie_regex.findall(instance.content)
