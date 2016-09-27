@@ -1,31 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from app.models.taskModel import Task
-from app.models.logModel import Log
 from app.publics.variable import scheduler
-import app.publics.variable as variable
+from app.extension.tools import add_log
 import datetime
-import requests
-import leancloud
-import json
 import pytz
-import re
 from multiprocessing.dummy import Pool as ThreadPool
-from config import TEST_LEANCLOUD_APP_ID,TEST_LEANCLOUD_APP_KEY,PRO_LEANCLOUD_APP_ID,PRO_LEANCLOUD_APP_KEY
 
 utc=pytz.UTC
-
-leancloud.init(PRO_LEANCLOUD_APP_ID,PRO_LEANCLOUD_APP_KEY)
-
-def add_log(content,fromTask,parameter):
-    log = Log(content=content,
-              fromTask=fromTask,
-              parameter=parameter,
-              createTime=datetime.datetime.now())
-    log.save()
-
-
-
 
 #添加任务
 def add_task():
@@ -79,7 +61,3 @@ def job4(a,b):
             'system',
             '')
 
-# if __name__ == '__main__':
-#     clazz = '57aa69611532bc0060e5b104'
-#     push_gambition_task(clazz,'job5')
-#     add_task()

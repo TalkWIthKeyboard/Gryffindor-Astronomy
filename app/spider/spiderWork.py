@@ -3,8 +3,9 @@
 from app.models.spiderDataModel import YearFinished, IdFinished
 from config import (MIN_YEAR, SEARCH_PAGE, SEARCH_API)
 from spiderModel import Search
-from spiderParse import get_movie_pages,get_movie_ids
-from app.extension.tools import get_unfinished
+from spiderParse import get_movie_pages,get_movie_ids,get_movie_info
+from app.extension.tools import get_unfinished,add_log,sleep2
+from multiprocessing.dummy import Pool as ThreadPool
 
 def get_year():
     '''
@@ -16,6 +17,7 @@ def get_year():
         return year.year
     else:
         return MIN_YEAR - 1
+
 
 def fetch(year, page):
     '''
@@ -38,7 +40,11 @@ def fetch(year, page):
     s.fetch(SEARCH_API)
     return s
 
+
 def spider():
+    '''
+        爬虫主函数
+    '''
     y_list = []
     y = get_year() + 1
     instance = fetch(y, 1)
@@ -60,22 +66,18 @@ def spider():
 
     y_list.extend(ids)
     if not y_list:
-        '''
-            这一年没有电影
-            (需要添加log)
-        '''
+        add_log()
         YearFinished(year=y).save()
-        '''
-            间隔时间，搜索下一年
-        '''
+        sleep2()
         return spider()
+    pages = 1
     if pages > 1:
         p = 2
         while p <= pages:
             instance = fetch(y, p)
-            '''
-                爬虫log
-            '''
+            add_log("开始爬取第{}年第{}页的电影信息".format(y,p),
+                    'SpiderSystem',
+                    '')
             ids = get_movie_ids(instance)
             if ids is None:
                 '''
@@ -83,9 +85,7 @@ def spider():
                 '''
             y_list.extend(ids)
             p += 1
-            '''
-                间隔时间
-            '''
+            sleep2()
     # 感觉应该是all
     obj = IdFinished.objects(year=y).first()
     if obj is not None:
@@ -97,15 +97,19 @@ def spider():
     '''
         对to_process进行电影爬虫
     '''
+    movie_info = get_movie_info(to_process[0])
+    # movie_info = ThreadPool(get_movie_info,to_process)
+
 
     # 这一年的任务已经完成
     YearFinished(year=y).save()
-    '''
-        log
-    '''
+    add_log("完成爬取第{}年所有的电影信息".format(y),
+            'SpiderSystem',
+            '')
 
 if __name__ == "__main__":
     spider()
+
 
 
 

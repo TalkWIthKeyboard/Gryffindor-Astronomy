@@ -20,7 +20,7 @@ SEARCH_API = 'http://service.channel.mtime.com/service/search.mcs'
 # 获取电影基本信息
 MOVIE_API = 'http://service.mtime.com/database/databaseService.m'
 
-MOVIE_PAGE = 'http://http://movie.mtime.com/{id}/&t={timestamp}'
+MOVIE_PAGE = 'http://movie.mtime.com/{id}/&t={timestamp}'
 
 # 获取评论的评论转发赞
 COMMENT_API = 'http://service.library.mtime.com/Movie.api'

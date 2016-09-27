@@ -2,12 +2,17 @@
 # -*- coding: utf-8 -*-
 import hashlib
 import random
+import time
 import zlib
+import datetime
+from config import INTERVAL
+from app.models.logModel import Log
 
 def get_md5(str1=None):
     md5 = hashlib.md5()
     md5.update(str1)
     return md5.hexdigest()
+
 
 def get_user_agent():
     '''
@@ -61,6 +66,7 @@ def get_user_agent():
         return 'Mozilla/5.0 (compatible; MSIE ' + version + '; ' + os + \
                '; ' + token + 'Trident/' + engine + ')'
 
+
 def deflate(data):
     '''
         deflate解压
@@ -70,9 +76,28 @@ def deflate(data):
     except zlib.error:
         return zlib.decompress(data)
 
+
 def get_unfinished(has, last):
     '''
         去重处理（获取last里面有而has里面没有的数据列表）
     '''
     # 集合的处理
     return list(set(last).difference(set(has)))
+
+
+def add_log(content,fromTask,parameter):
+    '''
+        添加日志
+    '''
+    log = Log(content=content,
+              fromTask=fromTask,
+              parameter=parameter,
+              createTime=datetime.datetime.now())
+    log.save()
+
+def sleep2(interval=None):
+    '''
+        sleep一定的时间
+    '''
+    num = interval if interval is not None else INTERVAL
+    time.sleep(num)

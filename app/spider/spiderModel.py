@@ -133,7 +133,6 @@ class Movie(Spider):
         params = self.params
         if not isinstance(params, OrderedDict):
             d = OrderedDict()
-            d = OrderedDict()
             d['Ajax_CallBack'] = True
             service = 'Mtime.Community.Controls.CommunityPages.DatabaseService'
             d['Ajax_CallBackType'] = service
