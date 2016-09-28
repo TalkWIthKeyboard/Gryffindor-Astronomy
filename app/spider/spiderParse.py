@@ -8,6 +8,7 @@ from config import MOVIE_PAGE, MOVIE_API
 from collections import defaultdict
 from app.spider.spiderModel import Spider
 from urllib2 import HTTPError
+from datetime import datetime
 
 
 movie_regex = re.compile(r'http://movie.mtime.com/(\d+)/')
@@ -20,6 +21,9 @@ ratingCount_regex = re.compile(r'"ratingCount":(\d+),')
 wantToSeeCount_regex = re.compile(r'"wantToSeeCount":(\d+),')
 name_regex = re.compile(ur'([\u4e00-\u9fa5]+)\s+(.*)')
 people_regex = re.compile(r'http://people.mtime.com/(\d+)/')
+date_regex = re.compile(ur'(\d+)年(\d+)月(\d+)日')
+detail_country_regex = re.compile(r'\[(.*)\]')
+
 
 movie_url = 'http://movie.mtime.com/{}/{}'
 
@@ -196,6 +200,8 @@ class PlotParse(Parse):
             # 保留了多段之间的u'\u3000\u3000'
             self.d['content'] +=l
 
+
+
 class ScenesParse(Parse):
     '''
         幕后揭秘页面爬虫
@@ -220,6 +226,100 @@ class ScenesParse(Parse):
 
 
 
+class DetailsParse(Parse):
+    '''
+        电影细节页面爬虫
+    '''
+    def set_url(self):
+        self.url = movie_url.format(self.id, 'details.html')
+
+    def xpath(self):
+        part = self.page.xpath('//dl[@class="wp50 fl"]')
+        dateXpath = self.page.xpath('//div[@class="datecont"]')
+        languageXpath = self.page.xpath('//div[@class="countryname"]')
+
+        # 更多中文外文名字和片长
+        aliases = part[0].xpath('dd')
+        for each in aliases:
+            l = each.xpath('strong')[0].text
+            movieinfo = {'cnalias': None,'enalias': None,'time': None}
+            if (l == u'更多中文名：'):
+                movieinfo['cnalias'] = [a.text.strip() for a in each.xpath('p')]
+            elif (l == u'更多外文名：'):
+                movieinfo['enalias'] = [a.text.strip() for a in each.xpath('p')]
+            elif (l == u'片长：'):
+                movieinfo['time'] = each.xpath('p')[0].text
+
+        # 上映地区和时间
+        release = []
+        for each in range(1, len(dateXpath)):
+            dict = {}
+            dict['cncountry'] = languageXpath[each].xpath('p')[0].text.strip()
+            dict['encountry'] = languageXpath[each].xpath('p/span')[0].text.strip()
+            dict['date'] = make_datetime(dateXpath[each].text.strip())
+            release.append(dict)
+
+        # 制作/发行
+        part = self.page.xpath('//dl[@id="companyRegion"]/dd/div/div[@class="fl wp49"]')
+        detail = defaultdict(list)
+        for p in part:
+            if p.xpath('h4')[0].text == u'制作公司':
+                cur_type = 'make'
+            else:
+                cur_type = 'publish'
+            for p2 in p.xpath('ul/li'):
+                name = p2.xpath('a')[0].text
+                country_info = p2.xpath('span')[0].text
+                match = detail_country_regex.findall(country_info)
+                if match:
+                    detail[cur_type] += [{'name':name, 'country':match[0]}]
+                else:
+                    detail[cur_type] += [{'name':name}]
+
+        self.d['detail'] += [{'detail':detail,'release':release,'movieinfo':movieinfo}]
+
+
+
+class AwardsParse(Parse):
+    '''
+        获奖情况爬虫
+    '''
+    def set_url(self):
+        self.url = movie_url.format(self.id, 'awards.html')
+
+    def xpath(self):
+        all = self.page.xpath('//div[@id="awardInfo_data"]/dd')
+        for elem in all:
+            name = elem.xpath('h3/b')[0].text
+            info = defaultdict(list)
+            year, period, awards = 0, 0, '未知'
+            try:
+                yp = elem.xpath('h3/span/a')[0].text
+            except:
+                # 可能获了一个大奖的好几届的奖
+                for e in elem.xpath('dl/child::*'):
+                    if e.tag == 'dt':
+                        if info:
+                            self.d['awards'] += [dict(
+                                name=name, year=year, period=period, awards=awards
+                            )]
+                            info = defaultdict(list)
+
+
+
+def make_datetime(text):
+    '''
+        通过中文类型的文本解析成datetime类型的日期结果
+    '''
+    make = lambda t: datetime(int(t[0]) ,int(t[1]), int(t[2]))
+    t = date_regex.findall(text)
+    if t:
+        if len(t) == 1:
+            return make(t[0])
+        else:
+            return [make(i) for i in t]
+    else:
+        return datetime.now()
 
 
 def get_movie_pages(instance):

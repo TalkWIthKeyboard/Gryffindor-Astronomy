@@ -3,7 +3,7 @@
 from app.models.spiderDataModel import YearFinished, IdFinished
 from config import (MIN_YEAR, SEARCH_PAGE, SEARCH_API)
 from spiderModel import Search
-from spiderParse import get_movie_pages,get_movie_ids,get_movie_info,ScenesParse
+from spiderParse import get_movie_pages,get_movie_ids
 from app.extension.tools import get_unfinished,add_log,sleep2
 from multiprocessing.dummy import Pool as ThreadPool
 
@@ -98,9 +98,9 @@ def spider():
         对to_process进行电影爬虫
     '''
 
-    test = ScenesParse('10070')
-    test.set_url()
-    l = test()
+    # test = DetailsParse('10150')
+    # test.set_url()
+    # l = test()
 
 
     # 这一年的任务已经完成
