@@ -3,8 +3,8 @@
 import re
 from lxml import etree
 from app.extension.tools import add_log
-from app.spider.spiderModel import Movie
-from config import MOVIE_PAGE, MOVIE_API
+from app.spider.spiderModel import Movie,Comment
+from config import MOVIE_PAGE, MOVIE_API, COMMENT_API
 from collections import defaultdict
 from app.spider.spiderModel import Spider
 from urllib2 import HTTPError
@@ -23,6 +23,10 @@ name_regex = re.compile(ur'([\u4e00-\u9fa5]+)\s+(.*)')
 people_regex = re.compile(r'http://people.mtime.com/(\d+)/')
 date_regex = re.compile(ur'(\d+)年(\d+)月(\d+)日')
 detail_country_regex = re.compile(r'\[(.*)\]')
+awardinfo_regex = re.compile(ur'(\d+).*第(\d+)届')
+comment_regex = re.compile(
+    r'\"reviewPraiseCount\":\[(.*)\].*\"reviewPraiseStatus\".*\"reviewShareCount\":\[(.*)\].*\"reviewCommentCount\":\[(.*)\]')
+
 
 
 movie_url = 'http://movie.mtime.com/{}/{}'
@@ -295,6 +299,17 @@ class AwardsParse(Parse):
             year, period, awards = 0, 0, '未知'
             try:
                 yp = elem.xpath('h3/span/a')[0].text
+                year,period = awardinfo_regex.findall(yp)[0]
+                for e in elem.xpath('dl/child::*'):
+                    if e.tag == 'dt':
+                        cur_type = e.text
+                    elif e.tag == 'dd':
+                        awardtype = e.xpath('span')[0].text
+                        try:
+                            people = e.xpath('a')[0].text
+                        except IndexError:
+                            people = ''
+                        info[cur_type] += [(people, awardtype)]
             except:
                 # 可能获了一个大奖的好几届的奖
                 for e in elem.xpath('dl/child::*'):
@@ -304,6 +319,123 @@ class AwardsParse(Parse):
                                 name=name, year=year, period=period, awards=awards
                             )]
                             info = defaultdict(list)
+
+                        if e.attrib.get('style'):
+                            yp = e.xpath('a')[0].text
+                            year, period = awardinfo_regex.findall(yp)[0]
+                        else:
+                            cur_type = e.text
+                    elif e.tag == 'dd':
+                        awardtype = e.xpath('span')[0].text
+                        try:
+                            people = e.xpath('a')[0].text
+                        except IndexError:
+                            people = ''
+                        info[cur_type] += [(people, awardtype)]
+
+            awards = []
+            for k,v in info.items():
+                awards.append(dict(type=k,peoples=v))
+                self.d['awards'] += [dict(name=name,year=year,period=period,awards=awards)]
+
+class CommentParse(Parse):
+    '''
+        电影评论爬虫
+    '''
+    def set_url(self):
+        self.url = movie_url.format(self.id, 'comment.html')
+
+    def xpath(self):
+        all = self.page.xpath('//dl[@class="clearfix"]')
+        # 先获取评论的id，然后通过api拿
+        blogids = [i.attrib['blogid']
+                   for i in self.page.xpath('//div[@class=\"db_comtool\"]')]
+        s = Comment(params={'Ajax_CallBackArgument0': ','.join(blogids),
+                            'Ajax_CallBackArgument1': '',
+                            'Ajax_RequestUrl': self.url})
+        s.fetch(COMMENT_API)
+        comment_api = comment_regex.findall(s.content)
+        for index,i in enumerate(all):
+            comments = i.xpath('dd[@class=\"comboxcont\"]/div')
+            if not comments:
+                continue
+            '''
+            '''
+            comment = comments[0]
+            t = comment.xpath('h3/a')[0]
+            # 文章的标题 文章的链接
+            title = t.text
+            url = t.attrib['href']
+            try:
+                shortcontent = comment.xpath('p')[0].text.strip()
+            except AttributeError:
+                shortcontent = ''
+            combox = i.xpath('dd[@class=\"comboxuser2\"]/div')[0]
+            image = combox.xpath('a/img')[0].attrib['src']
+            name = combox.xpath('a/img')[0].attrib['alt']
+            commenter_url = combox.xpath('p')[0].xpath('a')[0].attrib['href']
+            date = combox.xpath('p')[1].xpath('a')[0].attrib['entertime']
+            publishdate = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+            hasnext = self.check_next_page()
+            self.url = url
+
+            #重新设置要爬的页面
+            content = self.get_content()
+            look = combox.xpath('p')[2].text
+            score = 0
+            if look:
+                # 看过
+                score = float(combox.xpath('p')[2].xpath('span')[0].text)
+            ac, rc, cc =0, 0, 0
+            if comment_api:
+                ac, rc, cc = comment_api[0]
+                p = lambda x: x.split(',')[index - 1]
+                ac, rc, cc = p(ac), p(rc), p(cc)
+            self.d['comments'] += [{'commenter_url': commenter_url,
+                                    'ac': ac, 'rc': rc, 'url': url,
+                                    'image': image, 'title': title,
+                                    'name': name, 'score': score,
+                                    'content': content, 'shortcontent': shortcontent,
+                                    'cc': cc, 'publishdate': publishdate}]
+            if hasnext:
+                '''
+                    判断还有下一页会传回去继续累加页面,直到没有下一页
+                '''
+                return True
+
+    def get_content(self):
+        '''
+            爬去长评论页
+        '''
+        ret = self.spider()
+        all = ret.xpath('//div[@class="db_mediacont db_commentcont"]/p')
+        contents = []
+        cur_type = ''
+        for elem in all:
+            istext = elem.xpath('text()')
+            if istext:
+                if istext[0].strip():
+                    # 文本，否则空行
+                    cur_type = 'text'
+                    content = istext[0].strip()
+                else:
+                    continue
+            isembed = elem.xpath('embed')
+            if isembed:
+                # 内嵌flash之类
+                cur_type = 'embed'
+                content = str(isembed[0].attrib)
+            isimage = elem.xpath('img')
+            if isimage:
+                # 图片
+                cur_type = 'image'
+                image = []
+                for i in isimage:
+                    image.append(i.attrib['src'])
+                content = ','.join(image)
+            if cur_type != '':
+                contents.append({'type': cur_type, 'content':content})
+        return contents
 
 
 
