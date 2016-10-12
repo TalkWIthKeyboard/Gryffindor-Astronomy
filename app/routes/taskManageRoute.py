@@ -174,7 +174,7 @@ def system_start():
                 log.save()
                 each.isRunning = TASK_RUNNING
                 each.save()
-            tools.systemState = SYSTEM_RUNNING
+        tools.systemState = SYSTEM_RUNNING
         user = current_user
         log = Log(content='成功启动系统',
                   fromTask=user.userName,

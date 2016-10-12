@@ -83,39 +83,37 @@
                 </thead>
                 <tbody>
                     {% for task in paginate.items %}
-                        {% if task.isTest == 0 %}
-                            <tr>
-                                <td>{{ task.jobId }}</td>
-                                <td>{{ task.pushTime }}</td>
-                                <td>{{ task.beginDate }}</td>
-                                <td>{{ task.endDate }}</td>
-                                <td>
-                                    {% if task.isRunning == 1 %}
-                                        <p style="color: green;">正在运行队列中</p>
+                        <tr>
+                            <td>{{ task.jobId }}</td>
+                            <td>{{ task.pushTime }}</td>
+                            <td>{{ task.beginDate }}</td>
+                            <td>{{ task.endDate }}</td>
+                            <td>
+                                {% if task.isRunning == 1 %}
+                                    <p style="color: green;">正在运行队列中</p>
+                                {% else %}
+                                    {% if task.isRunning == 2 %}
+                                        <p style="color: blue">在队列中挂起</p>
                                     {% else %}
-                                        {% if task.isRunning == 2 %}
-                                            <p style="color: blue">在队列中挂起</p>
-                                        {% else %}
-                                            <p style="color: red">不在运行队列中</p>
-                                        {% endif %}
+                                        <p style="color: red">不在运行队列中</p>
                                     {% endif %}
-                                </td>
-                                <td style="white-space:nowrap;overflow:hidden;text-overflow: ellipsis;">
-                                    {{ task.description }}
-                                </td>
-                                <td>
-                                    {% if task.isRunning == 1 %}
-                                        <button type="button" class="btn btn-default btn-sm stop-button" data-id="{{ task._id }}"> 停止 </button>
-                                    {% else %}
-                                        <button type="button" class="btn btn-default btn-sm start-button" data-id="{{ task._id }}" data-date="{{ task.endDate }}"> 开启 </button>
-                                    {% endif %}
-                                    <button type="button" class="btn btn-info btn-sm change-bic-button" data-toggle="modal" data-target="#infoModal" data-id="{{ task._id }}"> 修改 </button>
-                                    <br/>
-                                    <button type="button" class="btn btn-danger btn-sm delete-bic-button" data-id="{{ task._id }}"> 删除 </button>
-                                    <button type="button" class="btn btn-warning btn-sm push-test-button" data-toggle="modal" data-target="#testModal" data-id="{{ task._id }}"> 测试 </button>
-                                </td>
-                            </tr>
-                        {% endif %}
+                                {% endif %}
+                            </td>
+                            <td style="white-space:nowrap;overflow:hidden;text-overflow: ellipsis;">
+                                {{ task.description }}
+                            </td>
+                            <td>
+                                {% if task.isRunning == 1 %}
+                                    <button type="button" class="btn btn-default btn-sm stop-button" data-id="{{ task._id }}"> 停止 </button>
+                                {% else %}
+                                    <button type="button" class="btn btn-default btn-sm start-button" data-id="{{ task._id }}" data-date="{{ task.endDate }}"> 开启 </button>
+                                {% endif %}
+                                <button type="button" class="btn btn-info btn-sm change-bic-button" data-toggle="modal" data-target="#infoModal" data-id="{{ task._id }}"> 修改 </button>
+                                <br/>
+                                <button type="button" class="btn btn-danger btn-sm delete-bic-button" data-id="{{ task._id }}"> 删除 </button>
+                                <button type="button" class="btn btn-warning btn-sm push-test-button" data-toggle="modal" data-target="#testModal" data-id="{{ task._id }}"> 测试 </button>
+                            </td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>

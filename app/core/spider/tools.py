@@ -71,7 +71,7 @@ def deflate(data):
 
 def get_unfinished(has, last):
     '''
-        去重处理（获取last里面有而has里面没有的数据列表）
+        去重处理（获取last里面没有而has里面有的数据列表）
     '''
     # 集合的处理
     return list(set(last).difference(set(has)))

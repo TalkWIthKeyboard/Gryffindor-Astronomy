@@ -1,7 +1,7 @@
 # coding=utf-8
 
-from app.models.spiderModel import YearFinished, IdFinished
-from app.core.spider.parse import get_movie_pages,get_movie_ids, CommentParse
+from app.models.spiderModel import YearFinished,IdFinished,Fullcredits,Plot,Scenes,Details
+from app.core.spider.parse import get_movie_pages,get_movie_ids,FullcreditsParse,PlotParse,ScenesParse,DetailsParse
 from app.core.spider.basic import get_year,fetch
 from app.core.spider.tools import get_unfinished,sleep2
 from app.core.tools import add_log
@@ -59,13 +59,70 @@ def spider():
     '''
         对to_process进行电影爬虫
     '''
-
-    test = CommentParse('10150')
-    test.set_url()
-    l = test()
+    details_spider('10170')
 
     # 这一年的任务已经完成
     YearFinished(year=y).save()
     add_log("完成爬取第{}年所有的电影信息".format(y),
             'SpiderSystem',
             '')
+
+def fullcredits_spider(id):
+    '''
+        演职人员页面爬虫
+    '''
+    try:
+        spider = FullcreditsParse(id)
+        spider.set_url()
+        ans = spider()
+        for each in ans:
+            if each != False:
+                Fullcredits(**each).save()
+    except Exception,e:
+        print e
+
+def plot_spider(id):
+    '''
+        电影剧情页面爬虫
+    '''
+    try:
+        spider = PlotParse(id)
+        spider.set_url()
+        ans = spider()
+        for each in ans:
+            if each != False:
+                Plot(**each).save()
+    except Exception,e:
+        print e
+
+def scenes_spider(id):
+    '''
+        幕后揭秘页面爬虫
+    '''
+    try:
+        spider = ScenesParse(id)
+        spider.set_url()
+        ans = spider()
+        for each in ans:
+            if each != False:
+                Scenes(**each).save()
+    except Exception,e:
+        print e
+
+def details_spider(id):
+    '''
+        电影细节页面爬虫
+    '''
+    try:
+        spider = DetailsParse(id)
+        spider.set_url()
+        ans = spider()
+        for each in ans:
+            if each != False:
+                Details(**each).save()
+    except Exception,e:
+        print e
+
+
+if __name__ == '__main__':
+    spider()

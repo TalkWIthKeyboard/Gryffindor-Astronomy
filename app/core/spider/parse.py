@@ -2,7 +2,7 @@
 
 import re
 from lxml import etree
-from tools import add_log
+from ..tools import add_log
 from spider import Movie,Comment,Spider
 from config import MOVIE_PAGE, MOVIE_API, COMMENT_API
 from collections import defaultdict
@@ -195,7 +195,8 @@ class PlotParse(Parse):
                     '''
                     if txt:
                         txt = txt[0]
-                l.append(txt)
+                if txt:
+                    l.append(txt)
 
             # 保留了多段之间的u'\u3000\u3000'
             self.d['content'] +=l
@@ -221,7 +222,7 @@ class ScenesParse(Parse):
                 xpath = 'div/'
                 title = elem.xpath(xpath + 'h3')[0].text
             l = []
-            l.extend(filter(lambda x: x.strip(), elem.xpath(xpath + 'div/p/text()|div/dl/dd/text()|div/dd/text()')))
+            l.extend(filter(lambda x: x.strip(), elem.xpath(xpath + 'div/p/text()|div/dl/dd/text()|div/dd/text()|div/p/a/text()')))
             self.d['scene'] += [{'title': title, 'content': l}]
 
 

@@ -1,5 +1,4 @@
 from app.models.config import Config
-import app.core.tools as variable
 from flask_mongoengine import MongoEngine
 from flask import Flask
 from flask_login import LoginManager
@@ -16,7 +15,6 @@ from app.models.adminModel import User
 from app.routes import taskManageRoute
 from app.routes import logRoute
 from app.routes import adminRoute
-
 
 @loginManager.user_loader
 def load_user(id):
