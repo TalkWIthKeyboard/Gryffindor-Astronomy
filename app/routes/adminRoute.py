@@ -4,7 +4,7 @@
 from flask import redirect,url_for,render_template,request,jsonify
 from flask_login import logout_user, current_user, login_user, login_required
 from app.models.adminModel import User
-from app.extension.tools import get_md5
+from app.core.tools import get_md5
 from app import app
 
 

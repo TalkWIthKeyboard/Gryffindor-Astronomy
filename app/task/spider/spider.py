@@ -3,7 +3,8 @@
 from app.models.spiderModel import YearFinished, IdFinished
 from app.core.spider.parse import get_movie_pages,get_movie_ids, CommentParse
 from app.core.spider.basic import get_year,fetch
-from app.extension.tools import get_unfinished,add_log,sleep2
+from app.core.spider.tools import get_unfinished,sleep2
+from app.core.tools import add_log
 from multiprocessing.dummy import Pool as ThreadPool
 
 

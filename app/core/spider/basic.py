@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from app.models.spiderModel import YearFinished, IdFinished
+from app.models.spiderModel import YearFinished
 from config import (MIN_YEAR, SEARCH_PAGE, SEARCH_API)
 from spider import Search
 try:

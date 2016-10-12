@@ -1,24 +1,26 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from app.models.taskModel import Task
-from app.core.tools import scheduler
-from app.extension.tools import add_log
+from app.core.tools import scheduler,add_log
 import datetime
 import pytz
+from config import TASK_RUNNING,TASK_STOP
 
 utc=pytz.UTC
 
-#添加任务
 def add_task():
+    '''
+        添加任务
+    '''
     try:
         date = str(datetime.datetime.now().strftime("%Y-%m-%d"))
         taskList = Task.objects(beginDate__lte=date,
                                 endDate__gte=date,
-                                isRunning=0 or 2).all()
+                                isRunning=TASK_STOP).all()
         if taskList:
             for each in taskList:
                 exec(str(each.command))
-                each.isRunning = 1
+                each.isRunning = TASK_RUNNING
                 each.save()
                 add_log('成功将任务 ' + each.jobId + ' 添加到任务队列中',
                         'system',
@@ -28,16 +30,19 @@ def add_task():
                 'system',
                 '')
 
-#删除任务
+
 def delete_task():
+    '''
+        删除任务
+    '''
     try:
         date = str(datetime.datetime.now().strftime("%Y-%m-%d"))
         taskList = Task.objects(endDate__lt=date,
-                                isRunning=1).all()
+                                isRunning=TASK_RUNNING).all()
         if taskList:
             for each in taskList:
                 scheduler.delete_job(str(each['jobId']))
-                each.isRunning = 0
+                each.isRunning = TASK_STOP
                 each.save()
                 add_log('成功将任务 ' + each.jobId + ' 从任务队列中踢出',
                         'system',

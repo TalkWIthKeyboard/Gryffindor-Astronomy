@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from flask import Flask, render_template, request, jsonify, redirect, url_for, make_response
+from flask import render_template, request, jsonify, redirect, url_for
+from app.task.basic.config import TASK_STOP,TASK_RUNNING,TASK_HANG,SYSTEM_RUNNING,SYSTEM_STOP
 from flask_login import login_required
 import app.core.tools as tools
 from app.models.taskModel import Task
@@ -42,7 +43,7 @@ def task_create():
                         command=request.form['command'],
                         description=request.form['description'],
                         updateTime=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        isRunning=0)
+                        isRunning=TASK_STOP)
             task.save()
             user = current_user
             log = Log(content='创建编号为 ' + str(task.jobId) + ' 的任务',
@@ -100,7 +101,7 @@ def task_delete(id):
                   parameter='',
                   createTime=datetime.datetime.now())
         log.save()
-        if task.isRunning == 1:
+        if task.isRunning == TASK_RUNNING:
             tools.scheduler.delete_job(str(task['jobId']))
         Task.objects(_id=id).delete()
     except Exception,e:
@@ -124,9 +125,8 @@ def task_show_search():
 def task_start(id):
     try:
         task = Task.objects(_id=id).first()
-        #开启任务,将任务的运行状态置为1
         tools.scheduler.resume_job(str(task['jobId']))
-        task.isRunning = 1
+        task.isRunning = TASK_RUNNING
         task.save()
         user = current_user
         log = Log(content='启动编号为 ' + str(task.jobId) + ' 的任务',
@@ -143,9 +143,8 @@ def task_start(id):
 def task_stop(id):
     try:
         task = Task.objects(_id=id).first()
-        #暂停任务,将任务的运行状态置为2
         tools.scheduler.pause_job(str(task['jobId']))
-        task.isRunning = 2
+        task.isRunning = TASK_HANG
         task.save()
         user = current_user
         log = Log(content='暂停编号为 ' + str(task.jobId) + ' 的任务',
@@ -165,7 +164,7 @@ def system_start():
             tools.scheduler.init_app(app)
             tools.scheduler.start()
         else:
-            tasks = Task.objects(isRunning=2).all()
+            tasks = Task.objects(isRunning=TASK_HANG).all()
             for each in tasks:
                 tools.scheduler.resume_job(str(each['jobId']))
                 log = Log(content='成功将任务 ' + each.jobId + ' 重新启动',
@@ -173,9 +172,9 @@ def system_start():
                           parameter='',
                           createTime=datetime.datetime.now())
                 log.save()
-                each.isRunning = 1
+                each.isRunning = TASK_RUNNING
                 each.save()
-            tools.systemState = 1
+            tools.systemState = SYSTEM_RUNNING
         user = current_user
         log = Log(content='成功启动系统',
                   fromTask=user.userName,
@@ -191,7 +190,7 @@ def system_start():
 @login_required
 def system_stop():
     try:
-        tasks = Task.objects(isRunning=1).all()
+        tasks = Task.objects(isRunning=TASK_RUNNING).all()
         for each in tasks:
             tools.scheduler.pause_job(str(each['jobId']))
             log = Log(content='成功将任务 ' + each.jobId + ' 在队列中挂起',
@@ -199,9 +198,9 @@ def system_stop():
                       parameter='',
                       createTime=datetime.datetime.now())
             log.save()
-            each.isRunning = 2
+            each.isRunning = TASK_HANG
             each.save()
-        tools.systemState = 0
+        tools.systemState = SYSTEM_STOP
         user = current_user
         log = Log(content='成功关闭系统',
                   fromTask=user.userName,

@@ -2,7 +2,7 @@
 
 import re
 from lxml import etree
-from app.extension.tools import add_log
+from tools import add_log
 from spider import Movie,Comment,Spider
 from config import MOVIE_PAGE, MOVIE_API, COMMENT_API
 from collections import defaultdict

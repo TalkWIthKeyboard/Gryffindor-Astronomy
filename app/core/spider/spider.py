@@ -14,7 +14,7 @@ from datetime import datetime
 from collections import OrderedDict
 from gzip import GzipFile
 
-from app.extension.tools import get_user_agent,deflate
+from tools import get_user_agent,deflate
 
 
 

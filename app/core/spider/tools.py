@@ -1,18 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import hashlib
+
 import random
 import time
 import zlib
-import datetime
 from config import INTERVAL
-from app.models.logModel import Log
-
-def get_md5(str1=None):
-    md5 = hashlib.md5()
-    md5.update(str1)
-    return md5.hexdigest()
-
 
 def get_user_agent():
     '''
@@ -84,16 +76,6 @@ def get_unfinished(has, last):
     # 集合的处理
     return list(set(last).difference(set(has)))
 
-
-def add_log(content,fromTask,parameter):
-    '''
-        添加日志
-    '''
-    log = Log(content=content,
-              fromTask=fromTask,
-              parameter=parameter,
-              createTime=datetime.datetime.now())
-    log.save()
 
 def sleep2(interval=None):
     '''
