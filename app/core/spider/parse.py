@@ -3,10 +3,9 @@
 import re
 from lxml import etree
 from app.extension.tools import add_log
-from app.spider.spiderModel import Movie,Comment
+from spider import Movie,Comment,Spider
 from config import MOVIE_PAGE, MOVIE_API, COMMENT_API
 from collections import defaultdict
-from app.spider.spiderModel import Spider
 from urllib2 import HTTPError
 from datetime import datetime
 
@@ -26,9 +25,6 @@ detail_country_regex = re.compile(r'\[(.*)\]')
 awardinfo_regex = re.compile(ur'(\d+).*第(\d+)届')
 comment_regex = re.compile(
     r'\"reviewPraiseCount\":\[(.*)\].*\"reviewPraiseStatus\".*\"reviewShareCount\":\[(.*)\].*\"reviewCommentCount\":\[(.*)\]')
-
-
-
 movie_url = 'http://movie.mtime.com/{}/{}'
 
 

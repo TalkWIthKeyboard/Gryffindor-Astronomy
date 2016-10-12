@@ -6,7 +6,7 @@ class Config(object):
         # 开启任务扫描(添加到任务列表)
         {
             'id' : 'job1',
-            'func' : 'app.extension.taskFunc:add_task',
+            'func' : 'app.task.basic.basic:add_task',
             'args' : (),
             'trigger' : {
                 'type' : 'interval',
@@ -17,7 +17,7 @@ class Config(object):
         # 开启任务扫描(过期任务踢出任务列表)
         {
             'id': 'job2',
-            'func': 'app.extension.taskFunc:delete_task',
+            'func': 'app.task.basic.basic:delete_task',
             'args': (),
             'trigger': {
                 'type': 'interval',

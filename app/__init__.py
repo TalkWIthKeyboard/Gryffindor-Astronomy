@@ -1,5 +1,5 @@
 from app.models.config import Config
-import app.publics.variable as variable
+import app.core.tools as variable
 from flask_mongoengine import MongoEngine
 from flask import Flask
 from flask_login import LoginManager

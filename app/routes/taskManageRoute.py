@@ -3,14 +3,13 @@
 
 from flask import Flask, render_template, request, jsonify, redirect, url_for, make_response
 from flask_login import login_required
-import app.publics.variable as variable
+import app.core.tools as tools
 from app.models.taskModel import Task
 from app.models.logModel import Log
 from flask_login import current_user
 from app import app
 import datetime
 import time
-import re
 import sys
 
 DEFAULT_PAGE_SIZE = 10
@@ -29,7 +28,7 @@ def task_show():
     args = request.args
     page = int(args.get('page', 1))
     paginate = Task.objects.paginate(page=page, per_page=10)
-    return render_template('taskManage/taskManage.html', paginate=paginate,systemState=variable.systemState)
+    return render_template('taskManage/taskManage.html', paginate=paginate,systemState=tools.systemState)
 
 @app.route('/taskManage/create',methods=['POST'])
 @login_required
@@ -102,7 +101,7 @@ def task_delete(id):
                   createTime=datetime.datetime.now())
         log.save()
         if task.isRunning == 1:
-            variable.scheduler.delete_job(str(task['jobId']))
+            tools.scheduler.delete_job(str(task['jobId']))
         Task.objects(_id=id).delete()
     except Exception,e:
         return jsonify(dict(success=False))
@@ -116,7 +115,7 @@ def task_show_search():
         jobId = args.get('jobId','')
         page = int(args.get('page', 1))
         paginate = Task.objects(jobId__contains=jobId).paginate(page=page, per_page=10)
-        return render_template('taskManage/taskManage.html', paginate=paginate,systemState=variable.systemState)
+        return render_template('taskManage/taskManage.html', paginate=paginate,systemState=tools.systemState)
     except Exception,e:
         return e
 
@@ -126,7 +125,7 @@ def task_start(id):
     try:
         task = Task.objects(_id=id).first()
         #开启任务,将任务的运行状态置为1
-        variable.scheduler.resume_job(str(task['jobId']))
+        tools.scheduler.resume_job(str(task['jobId']))
         task.isRunning = 1
         task.save()
         user = current_user
@@ -145,7 +144,7 @@ def task_stop(id):
     try:
         task = Task.objects(_id=id).first()
         #暂停任务,将任务的运行状态置为2
-        variable.scheduler.pause_job(str(task['jobId']))
+        tools.scheduler.pause_job(str(task['jobId']))
         task.isRunning = 2
         task.save()
         user = current_user
@@ -162,13 +161,13 @@ def task_stop(id):
 @login_required
 def system_start():
     try:
-        if variable.scheduler.running != True:
-            variable.scheduler.init_app(app)
-            variable.scheduler.start()
+        if tools.scheduler.running != True:
+            tools.scheduler.init_app(app)
+            tools.scheduler.start()
         else:
             tasks = Task.objects(isRunning=2).all()
             for each in tasks:
-                variable.scheduler.resume_job(str(each['jobId']))
+                tools.scheduler.resume_job(str(each['jobId']))
                 log = Log(content='成功将任务 ' + each.jobId + ' 重新启动',
                           fromTask='system',
                           parameter='',
@@ -176,7 +175,7 @@ def system_start():
                 log.save()
                 each.isRunning = 1
                 each.save()
-        variable.systemState = 1
+            tools.systemState = 1
         user = current_user
         log = Log(content='成功启动系统',
                   fromTask=user.userName,
@@ -194,7 +193,7 @@ def system_stop():
     try:
         tasks = Task.objects(isRunning=1).all()
         for each in tasks:
-            variable.scheduler.pause_job(str(each['jobId']))
+            tools.scheduler.pause_job(str(each['jobId']))
             log = Log(content='成功将任务 ' + each.jobId + ' 在队列中挂起',
                       fromTask='system',
                       parameter='',
@@ -202,7 +201,7 @@ def system_stop():
             log.save()
             each.isRunning = 2
             each.save()
-        variable.systemState = 0
+        tools.systemState = 0
         user = current_user
         log = Log(content='成功关闭系统',
                   fromTask=user.userName,

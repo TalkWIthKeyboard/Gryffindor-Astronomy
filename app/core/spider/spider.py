@@ -10,10 +10,12 @@ try:
     from cStringIO import StringIO
 except:
     from StringIO import StringIO
-from gzip import GzipFile
-from app.extension.tools import get_user_agent,deflate
 from datetime import datetime
 from collections import OrderedDict
+from gzip import GzipFile
+
+from app.extension.tools import get_user_agent,deflate
+
 
 
 class ContentEncodingProcessor(urllib2.BaseHandler):
@@ -64,7 +66,6 @@ class ContentEncodingProcessor(urllib2.BaseHandler):
             gz, old_resp.headers, old_resp.url, old_resp.code)
         resp.msg = old_resp.msg
         return resp
-
 
 class Spider(object):
     '''

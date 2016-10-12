@@ -1,11 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from app.models.taskModel import Task
-from app.publics.variable import scheduler
+from app.core.tools import scheduler
 from app.extension.tools import add_log
 import datetime
 import pytz
-from multiprocessing.dummy import Pool as ThreadPool
 
 utc=pytz.UTC
 
@@ -52,12 +51,6 @@ def delete_task():
 def job3(a,b):
     answer = '>>>>>>>>>>job3带参数测试' + str(a) + ' ' + str(b) + '<<<<<<<<<<'
     add_log('job3任务执行成功,输出: ' + answer,
-            'system',
-            '')
-
-def job4(a,b):
-    answer = '>>>>>>>>>>job4带参数测试' + str(a) + ' ' + str(b) + '<<<<<<<<<<'
-    add_log('job4任务执行成功,输出: ' + answer,
             'system',
             '')
 
