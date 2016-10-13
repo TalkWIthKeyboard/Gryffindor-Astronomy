@@ -241,9 +241,9 @@ class DetailsParse(Parse):
 
         # 更多中文外文名字和片长
         aliases = part[0].xpath('dd')
+        movieinfo = {'cnalias': None, 'enalias': None, 'time': None}
         for each in aliases:
             l = each.xpath('strong')[0].text
-            movieinfo = {'cnalias': None,'enalias': None,'time': None}
             if (l == u'更多中文名：'):
                 movieinfo['cnalias'] = [a.text.strip() for a in each.xpath('p')]
             elif (l == u'更多外文名：'):

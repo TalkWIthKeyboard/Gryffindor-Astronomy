@@ -48,8 +48,9 @@ class Actor(db.EmbeddedDocument):
     play = db.StringField(max_length=60, required=True) #剧中人物
 
 class Director(db.EmbeddedDocument):
-
-    '''导演信息'''
+    '''
+        导演信息
+    '''
     mid = db.IntField(default=0)  # 演员链接的唯一ID
     name = db.StringField(max_length=60)  # 导演名字
     cnname = db.StringField(max_length=60)  # 可能有中文翻译过来的名字
@@ -100,33 +101,95 @@ class EmbeddedScenes(db.EmbeddedDocument):
     content = db.ListField(db.StringField())
 
 class Scenes(db.Document, MtimeMixin):
-
     '''
         幕后揭秘
     '''
     scene = db.ListField(db.EmbeddedDocumentField(EmbeddedScenes))  # 花絮
 
 class Company(db.EmbeddedDocument):
-
     '''
         制作/发行信息
     '''
     name = db.StringField(max_length=60, required=True)  # 公司名字
     country = db.StringField(max_length=30)  # 公司所在国家
 
-class Details(db.Document, MtimeMixin):
-
+class MovieInfo(db.EmbeddedDocument):
     '''
-        详细信息
+        更多的名字信息和时长
     '''
     enalias = db.ListField(db.StringField())  # 中文片名
     cnalias = db.ListField(db.StringField())  # 外文片名
     time = db.StringField(max_length=60)  # 片长
-    language = db.ListField(db.StringField(max_length=10))  # 对白语言
-    cost = db.StringField()  # 制作成本
-    date = db.ListField(db.DateTimeField())  # 拍摄日期
-    release = db.ListField(db.EmbeddedDocumentField(EmbeddedReleaseInfo))  # 新增的发布情况
+
+class Release(db.EmbeddedDocument):
+    '''
+        上映地区和时间
+    '''
+    encountry = db.StringField()  # 地区英文名
+    cncountry = db.StringField()  # 地区中文名
+    date = db.DateTimeField()  # 上映日期
+
+class MovieDetail(db.EmbeddedDocument):
+    '''
+        制作公司、发行商等细节
+    '''
     publish = db.ListField(db.EmbeddedDocumentField(Company))  # 发行公司
     make = db.ListField(db.EmbeddedDocumentField(Company))  # 制作公司
-    site = db.ListField(db.StringField(max_length=60, required=True))  # 官方网址
+
+class Details(db.Document, MtimeMixin):
+    '''
+        详细信息
+    '''
+    movieinfo = db.EmbeddedDocumentField(MovieInfo)
+    release = db.ListField(db.EmbeddedDocumentField(Release))
+    detail = db.EmbeddedDocumentField(MovieDetail)
+
+class Awardsinfo(db.EmbeddedDocument):
+    type = db.StringField(max_length=30, required=True)  # 提名或者获奖
+    peoples = db.ListField(db.ListField(required=True))  # 获奖的人, 但不是必选,有些奖项是整个电影的成就
+
+class Oneawards(db.EmbeddedDocument):
+    name = db.StringField(max_length=30, required=True)  # 奖项名, 比如 奥斯卡金像奖
+    period = db.IntField(required=True)  # 届
+    year = db.IntField(required=True)  # 年份
+    awards = db.ListField(db.EmbeddedDocumentField(Awardsinfo))  # 获奖的具体情况: 奖项-人物
+
+class Awards(db.Document, MtimeMixin):
+    '''
+        获奖记录
+    '''
+    awards = db.ListField(db.EmbeddedDocumentField(Oneawards))
+
+class EmbeddedContent(db.EmbeddedDocument):
+    type = db.StringField(max_length=10, required=True)  # 比如文本,视频,图片, 内嵌
+    content = db.StringField()  # 内容
+
+class EmbeddedComment(db.EmbeddedDocument):
+    name = db.StringField(max_length=30, required=True)  # 发评论人
+    commenter_url = db.StringField(max_length=100)  # 评论人的url
+    ac = db.IntField(default=0, required=True)  # 点赞数
+    rc = db.IntField(default=0, required=True)  # 转发数
+    cc = db.IntField(default=0, required=True)  # 评论数
+    url = db.StringField(max_length=100, required=True)  # 原文url
+    poster = db.StringField(max_length=100)  # 原文的海报图
+    image = db.StringField(max_length=120, required=True)  # 评论人图片url
+    title = db.StringField(max_length=60)  # 标题
+    score = db.FloatField()  # 评分, 只是看过的人会评分,但不评分
+    content = db.ListField(db.EmbeddedDocumentField(EmbeddedContent))  # 评论内容
+    shortcontent = db.StringField(default='')  # 评论内容的简略, 也就是mtime直接显示的那部分
+    publishdate = db.DateTimeField(default=datetime.now())  # 发表时间
+
+    meta = {'allow_inheritance': True}
+
+
+class EmbeddedMicroComment(EmbeddedComment):
+    content = db.StringField()  # 评论内容格式不同
+
+
+class Comment(db.Document, MtimeMixin):
+    comments = db.ListField(db.EmbeddedDocumentField(EmbeddedComment))  # 长评
+
+
+class MicroComment(db.Document, MtimeMixin):
+    microcomments = db.ListField(db.EmbeddedDocumentField(EmbeddedMicroComment))  # 微评
 

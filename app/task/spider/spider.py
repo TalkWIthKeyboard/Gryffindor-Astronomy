@@ -1,9 +1,10 @@
 # coding=utf-8
 
-from app.models.spiderModel import YearFinished,IdFinished,Fullcredits,Plot,Scenes,Details
-from app.core.spider.parse import get_movie_pages,get_movie_ids,FullcreditsParse,PlotParse,ScenesParse,DetailsParse
+from app.models.spiderModel import YearFinished,IdFinished,Fullcredits,Plot,Scenes,Details,Awards,Comment
+from app.core.spider.parse import get_movie_pages,get_movie_ids,FullcreditsParse,PlotParse,ScenesParse,DetailsParse,AwardsParse,CommentParse
 from app.core.spider.basic import get_year,fetch
 from app.core.spider.tools import get_unfinished,sleep2
+from app.core.spider.config import VERIFY_INTERVAL
 from app.core.tools import add_log
 from multiprocessing.dummy import Pool as ThreadPool
 
@@ -20,29 +21,29 @@ def spider():
         # 可能被挡了，也可能这一页本来就没内容(需要添加log，调整间断时间)
         pass
     ids = get_movie_ids(instance)
-    print ids
     if ids is None:
         # 可能被挡了，也可能这一页本来就没内容(需要添加log，调整间断时间)
         pass
 
     y_list.extend(ids)
     if not y_list:
-        add_log()
+        print ('Year: {} has not movie'.format(y))
         YearFinished(year=y).save()
         sleep2()
         return spider()
-    pages = 1
     if pages > 1:
         p = 2
         while p <= pages:
             instance = fetch(y, p)
-            add_log("开始爬取第{}年第{}页的电影信息".format(y,p),
-                    'SpiderSystem',
-                    '')
+            print "开始爬取第{}年第{}页的电影信息".format(y,p)
+            # add_log("开始爬取第{}年第{}页的电影信息".format(y,p),
+            #         'SpiderSystem',
+            #         '')
             ids = get_movie_ids(instance)
             if ids is None:
                 # 可能被挡住了，等待一段时间
-                pass
+                sleep2(VERIFY_INTERVAL)
+                continue
             y_list.extend(ids)
             p += 1
             sleep2()
@@ -59,13 +60,20 @@ def spider():
     '''
         对to_process进行电影爬虫
     '''
-    details_spider('10170')
+    for each in to_process:
+        fullcredits_spider(each)
+        plot_spider(each)
+        scenes_spider(each)
+        details_spider(each)
+        awards_spider(each)
+        comment_spider(each)
 
     # 这一年的任务已经完成
     YearFinished(year=y).save()
-    add_log("完成爬取第{}年所有的电影信息".format(y),
-            'SpiderSystem',
-            '')
+    print "完成爬取第{}年所有的电影信息".format(y)
+    # add_log("完成爬取第{}年所有的电影信息".format(y),
+    #         'SpiderSystem',
+    #         '')
 
 def fullcredits_spider(id):
     '''
@@ -119,10 +127,42 @@ def details_spider(id):
         ans = spider()
         for each in ans:
             if each != False:
-                Details(**each).save()
+                detail = each['detail']
+                movieid = each['movieid']
+                for detail_each in detail:
+                    if detail_each != False:
+                        detail_each['movieid'] = movieid
+                        Details(**detail_each).save()
     except Exception,e:
         print e
 
+def awards_spider(id):
+    '''
+        获奖情况爬虫
+    '''
+    try:
+        spider = AwardsParse(id)
+        spider.set_url()
+        ans = spider()
+        for each in ans:
+            if each != False:
+                Awards(**each).save()
+    except Exception,e:
+        print e
+
+def comment_spider(id):
+    '''
+        电影评论爬虫
+    '''
+    try:
+        spider = CommentParse(id)
+        spider.set_url()
+        ans = spider()
+        for each in ans:
+            if each != False:
+                Comment(**each).save()
+    except Exception,e:
+        print e
 
 if __name__ == '__main__':
     spider()
