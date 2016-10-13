@@ -1,9 +1,10 @@
 # coding=utf-8
 
-from app.models.spiderModel import YearFinished,IdFinished,Fullcredits,Plot,Scenes,Details,Awards,Comment,Score
-from app.core.spider.parse import get_movie_pages,get_movie_ids,FullcreditsParse,PlotParse,ScenesParse,DetailsParse,AwardsParse,CommentParse,get_movie_info
-from app.core.spider.basic import get_year,fetch
-from app.core.spider.tools import get_unfinished,sleep2
+from app.models.spiderModel import YearFinished, IdFinished, Fullcredits, Plot, Scenes, Details, Awards, Comment, Score
+from app.core.spider.parse import (get_movie_pages, get_movie_ids, get_movie_info,
+                                   FullcreditsParse, PlotParse, ScenesParse, DetailsParse, AwardsParse, CommentParse)
+from app.core.spider.basic import get_year, fetch
+from app.core.spider.tools import get_unfinished, sleep2
 from app.core.spider.config import VERIFY_INTERVAL
 from app.core.tools import add_log
 from multiprocessing.dummy import Pool as ThreadPool
