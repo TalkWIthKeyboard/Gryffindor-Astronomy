@@ -1,7 +1,7 @@
 # coding=utf-8
 
-from app.models.spiderModel import YearFinished,IdFinished,Fullcredits,Plot,Scenes,Details,Awards,Comment
-from app.core.spider.parse import get_movie_pages,get_movie_ids,FullcreditsParse,PlotParse,ScenesParse,DetailsParse,AwardsParse,CommentParse
+from app.models.spiderModel import YearFinished,IdFinished,Fullcredits,Plot,Scenes,Details,Awards,Comment,Score
+from app.core.spider.parse import get_movie_pages,get_movie_ids,FullcreditsParse,PlotParse,ScenesParse,DetailsParse,AwardsParse,CommentParse,get_movie_info
 from app.core.spider.basic import get_year,fetch
 from app.core.spider.tools import get_unfinished,sleep2
 from app.core.spider.config import VERIFY_INTERVAL
@@ -31,17 +31,15 @@ def spider():
         YearFinished(year=y).save()
         sleep2()
         return spider()
+    pages = 1
     if pages > 1:
         p = 2
         while p <= pages:
             instance = fetch(y, p)
             print "开始爬取第{}年第{}页的电影信息".format(y,p)
-            # add_log("开始爬取第{}年第{}页的电影信息".format(y,p),
-            #         'SpiderSystem',
-            #         '')
             ids = get_movie_ids(instance)
             if ids is None:
-                # 可能被挡住了，等待一段时间
+                print "被挡住了，系统要睡一会"
                 sleep2(VERIFY_INTERVAL)
                 continue
             y_list.extend(ids)
@@ -61,6 +59,7 @@ def spider():
         对to_process进行电影爬虫
     '''
     for each in to_process:
+        score_spider(each)
         fullcredits_spider(each)
         plot_spider(each)
         scenes_spider(each)
@@ -71,9 +70,13 @@ def spider():
     # 这一年的任务已经完成
     YearFinished(year=y).save()
     print "完成爬取第{}年所有的电影信息".format(y)
-    # add_log("完成爬取第{}年所有的电影信息".format(y),
-    #         'SpiderSystem',
-    #         '')
+
+
+
+'''
+    模块爬虫任务
+    （方便主爬虫函数直接调用，也方便后面改为多线程）
+'''
 
 def fullcredits_spider(id):
     '''
@@ -161,6 +164,16 @@ def comment_spider(id):
         for each in ans:
             if each != False:
                 Comment(**each).save()
+    except Exception,e:
+        print e
+
+def score_spider(id):
+    '''
+        电影得分爬虫
+    '''
+    try:
+        score = get_movie_info(id)
+        Score(**score).save()
     except Exception,e:
         print e
 

@@ -34,7 +34,7 @@ class ContentEncodingProcessor(urllib2.BaseHandler):
 
     def http_request(self, req):
         req.add_header('Accept-Encoding','gzip, deflate')
-        req.add_header('User-Agent', get_user_agent)
+        req.add_header('User-Agent', get_user_agent())
         req.add_header('Accept-Language',
                        'zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3')
         if self.additional_headers is not None:

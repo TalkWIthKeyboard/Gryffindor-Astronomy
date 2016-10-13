@@ -506,6 +506,7 @@ def get_movie_info(id):
     rating = checkmatch(rating_regex, s, float)
     ratingcount = checkmatch(ratingCount_regex, s)
     want = checkmatch(wantToSeeCount_regex, s)
+    movieid = id
     del s,id
     return locals()
 

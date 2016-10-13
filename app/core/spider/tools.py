@@ -81,5 +81,5 @@ def sleep2(interval=None):
     '''
         sleep一定的时间
     '''
-    num = interval if interval is not None else INTERVAL
+    num = interval if interval is not None else random.random()*INTERVAL
     time.sleep(num)

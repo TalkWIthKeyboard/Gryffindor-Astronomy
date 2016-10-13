@@ -193,3 +193,12 @@ class Comment(db.Document, MtimeMixin):
 class MicroComment(db.Document, MtimeMixin):
     microcomments = db.ListField(db.EmbeddedDocumentField(EmbeddedMicroComment))  # 微评
 
+class Score(db.Document, MtimeMixin):
+    '''
+        电影评分
+    '''
+    favorited = db.IntField()  # 喜欢的人数
+    rating = db.IntField()  # 得分 满分10分
+    ratingcount = db.IntField()  # 参与评分的人数
+    want = db.IntField()  # 想观看的人数
+

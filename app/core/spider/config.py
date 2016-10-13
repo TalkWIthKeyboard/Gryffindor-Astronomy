@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # 爬取页面间的间隔, 单位s
-INTERVAL = 8
+INTERVAL = 16
 # 提示验证码的重试间隔
 VERIFY_INTERVAL = 1200
 
