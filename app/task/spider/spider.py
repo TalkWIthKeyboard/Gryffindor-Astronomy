@@ -1,8 +1,8 @@
 # coding=utf-8
 
-from app.models.spiderModel import YearFinished, IdFinished, Fullcredits, Plot, Scenes, Details, Awards, Comment, Score
+from app.models.spiderModel import YearFinished, IdFinished, Fullcredits, Plot, Scenes, Details, Awards, Comment, Score, BasicInfo
 from app.core.spider.parse import (get_movie_pages, get_movie_ids, get_movie_info,
-                                   FullcreditsParse, PlotParse, ScenesParse, DetailsParse, AwardsParse, CommentParse)
+                                   FullcreditsParse, PlotParse, ScenesParse, DetailsParse, AwardsParse, CommentParse, BasicInfoParse)
 from app.core.spider.basic import get_year, fetch
 from app.core.spider.tools import get_unfinished, sleep2
 from app.core.spider.config import VERIFY_INTERVAL
@@ -15,6 +15,7 @@ def spider():
     '''
     y_list = []
     y = get_year() + 1
+    print "开始爬取第{}年所有的电影信息".format(y)
     instance = fetch(y, 1)
     pages = get_movie_pages(instance)
     if pages is None:
@@ -61,6 +62,7 @@ def spider():
     for each in to_process:
         num += 1
         print "开始第{}个电影的爬虫".format(num)
+        basic_spider(each)
         score_spider(each)
         fullcredits_spider(each)
         plot_spider(each)
@@ -71,7 +73,9 @@ def spider():
 
     # 这一年的任务已经完成
     YearFinished(year=y).save()
+    IdFinished(year=y, ids=y_list).save()
     print "完成爬取第{}年所有的电影信息".format(y)
+    spider()
 
 
 
@@ -179,5 +183,16 @@ def score_spider(id):
     except Exception,e:
         print e
 
-if __name__ == '__main__':
-    spider()
+def basic_spider(id):
+    '''
+        电影基本信息爬虫
+    '''
+    try:
+        spider = BasicInfoParse(id)
+        spider.set_url()
+        ans = spider()
+        for each in ans:
+            if each != None:
+                BasicInfo(**each).save()
+    except Exception,e:
+        print e

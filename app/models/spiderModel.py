@@ -21,7 +21,7 @@ class YearFinished(db.Document):
     }
 
 
-class IdFinished(db.Document, MtimeMixin):
+class IdFinished(db.Document):
     '''
         按年份爬虫列表完成后保存电影的id
     '''
@@ -201,4 +201,12 @@ class Score(db.Document, MtimeMixin):
     rating = db.IntField()  # 得分 满分10分
     ratingcount = db.IntField()  # 参与评分的人数
     want = db.IntField()  # 想观看的人数
+
+class BasicInfo(db.Document, MtimeMixin):
+    '''
+        电影基本信息
+    '''
+    cnname = db.StringField()  # 主要的中文名字
+    enname = db.StringField()  # 主要的英文名字
+
 

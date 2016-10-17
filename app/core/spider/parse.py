@@ -26,6 +26,8 @@ awardinfo_regex = re.compile(ur'(\d+).*第(\d+)届')
 comment_regex = re.compile(
     r'\"reviewPraiseCount\":\[(.*)\].*\"reviewPraiseStatus\".*\"reviewShareCount\":\[(.*)\].*\"reviewCommentCount\":\[(.*)\]')
 movie_url = 'http://movie.mtime.com/{}/{}'
+main_cnname = re.compile(r'<h1 style="font-size:35px;" property="v:itemreviewed">(.*)</h1>')
+main_enname = re.compile(r'<p class="db_enname" style="font-size:25px;">(.*)</p>')
 
 
 
@@ -80,6 +82,20 @@ class Parse(object):
         return self.page.xpath('//a[@id=\"key_nextpage\\"]')
 
 
+class BasicInfoParse(Parse):
+    '''
+        电影基本信息爬虫
+    '''
+    def set_url(self):
+        self.url = movie_url.format(self.id,'')
+
+    def xpath(self):
+        dict = {}
+        db_head = self.page.xpath('//div[@class="db_head"]/div[@class="clearfix"]')[0]
+        dict['cname'] = db_head.xpath('h1')[0].text
+        dict['ename'] = db_head.xpath('p[@class="db_enname"]')[0].text
+        dict['movieid'] = self.url
+        return dict
 
 class FullcreditsParse(Parse):
     '''
