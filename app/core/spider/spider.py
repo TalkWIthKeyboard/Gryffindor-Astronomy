@@ -15,7 +15,12 @@ from collections import OrderedDict
 from gzip import GzipFile
 
 from tools import get_user_agent,deflate
+from app.models.ipModel import Ip
+import random
+import socket
 
+
+socket.setdefaulttimeout(6)
 
 
 class ContentEncodingProcessor(urllib2.BaseHandler):
@@ -83,18 +88,34 @@ class Spider(object):
     def make_query(self):
         return {}
 
+    def make_proxy(self):
+        list = []
+        obj = Ip.objects()
+        for each in obj:
+            list.append(each.to_dict())
+        return list[random.randint(0,len(list) - 1)]
+
+
     def fetch(self,url):
+        proxy = self.make_proxy()
+        proxydict = {'http':'http://{}:{}'.format(proxy['ip'],proxy['port'])}
+        proxy_handler = urllib2.ProxyHandler(proxydict)
         opener = urllib2.build_opener(
             ContentEncodingProcessor(self.cookie_support,
                                      self.additional_headers),
-            urllib2.HTTPHandler
+            urllib2.HTTPHandler,
+            proxy_handler
         )
         urllib2.install_opener(opener)
         params = urllib.urlencode(self.make_query())
         if params:
             url = '{}?{}'.format(url, params)
         req = urllib2.Request(url)
-        self.content = urllib2.urlopen(req).read()
+        try:
+            self.content = urllib2.urlopen(req).read()
+        except Exception,e:
+            print "因为{}原因被挡住了，换IP！！".format(e.message)
+            self.fetch(url)
 
     @classmethod
     def get_timestamp(cls):

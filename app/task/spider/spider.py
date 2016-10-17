@@ -9,10 +9,9 @@ from app.core.spider.config import VERIFY_INTERVAL
 from app.core.tools import add_log
 from multiprocessing.dummy import Pool as ThreadPool
 
-
 def spider():
     '''
-        爬虫主函数
+        电影爬虫主函数
     '''
     y_list = []
     y = get_year() + 1
@@ -20,11 +19,11 @@ def spider():
     pages = get_movie_pages(instance)
     if pages is None:
         # 可能被挡了，也可能这一页本来就没内容(需要添加log，调整间断时间)
-        pass
+        spider()
     ids = get_movie_ids(instance)
     if ids is None:
         # 可能被挡了，也可能这一页本来就没内容(需要添加log，调整间断时间)
-        pass
+        spider()
 
     y_list.extend(ids)
     if not y_list:
@@ -32,7 +31,6 @@ def spider():
         YearFinished(year=y).save()
         sleep2()
         return spider()
-    pages = 1
     if pages > 1:
         p = 2
         while p <= pages:
@@ -41,7 +39,7 @@ def spider():
             ids = get_movie_ids(instance)
             if ids is None:
                 print "被挡住了，系统要睡一会"
-                sleep2(VERIFY_INTERVAL)
+                # sleep2(VERIFY_INTERVAL)
                 continue
             y_list.extend(ids)
             p += 1
@@ -59,7 +57,10 @@ def spider():
     '''
         对to_process进行电影爬虫
     '''
+    num = 0
     for each in to_process:
+        num += 1
+        print "开始第{}个电影的爬虫".format(num)
         score_spider(each)
         fullcredits_spider(each)
         plot_spider(each)
