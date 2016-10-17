@@ -90,7 +90,6 @@ def fullcredits_spider(id):
     '''
     try:
         spider = FullcreditsParse(id)
-        spider.set_url()
         ans = spider()
         for each in ans:
             if each != False:
@@ -104,7 +103,6 @@ def plot_spider(id):
     '''
     try:
         spider = PlotParse(id)
-        spider.set_url()
         ans = spider()
         for each in ans:
             if each != False:
@@ -118,7 +116,6 @@ def scenes_spider(id):
     '''
     try:
         spider = ScenesParse(id)
-        spider.set_url()
         ans = spider()
         for each in ans:
             if each != False:
@@ -132,7 +129,6 @@ def details_spider(id):
     '''
     try:
         spider = DetailsParse(id)
-        spider.set_url()
         ans = spider()
         for each in ans:
             if each != False:
@@ -151,7 +147,6 @@ def awards_spider(id):
     '''
     try:
         spider = AwardsParse(id)
-        spider.set_url()
         ans = spider()
         for each in ans:
             if each != False:
@@ -165,7 +160,6 @@ def comment_spider(id):
     '''
     try:
         spider = CommentParse(id)
-        spider.set_url()
         ans = spider()
         for each in ans:
             if each != False:
@@ -189,10 +183,12 @@ def basic_spider(id):
     '''
     try:
         spider = BasicInfoParse(id)
-        spider.set_url()
         ans = spider()
         for each in ans:
             if each != None:
-                BasicInfo(**each).save()
+                obj_each = {}
+                obj_each['info'] = each['info'][0]
+                obj_each['movieid'] = each['movieid']
+                BasicInfo(**obj_each).save()
     except Exception,e:
         print e

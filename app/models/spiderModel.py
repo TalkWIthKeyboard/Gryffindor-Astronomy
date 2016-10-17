@@ -202,11 +202,18 @@ class Score(db.Document, MtimeMixin):
     ratingcount = db.IntField()  # 参与评分的人数
     want = db.IntField()  # 想观看的人数
 
-class BasicInfo(db.Document, MtimeMixin):
+class EmbeddedBasicInfo(db.EmbeddedDocument):
     '''
         电影基本信息
     '''
     cnname = db.StringField()  # 主要的中文名字
     enname = db.StringField()  # 主要的英文名字
+    img = db.StringField() # 宣传图url
+
+class BasicInfo(db.Document, MtimeMixin):
+    '''
+        封装电影基本信息
+    '''
+    info = db.EmbeddedDocumentField(EmbeddedBasicInfo) # 基本信息列表
 
 

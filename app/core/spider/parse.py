@@ -92,10 +92,11 @@ class BasicInfoParse(Parse):
     def xpath(self):
         dict = {}
         db_head = self.page.xpath('//div[@class="db_head"]/div[@class="clearfix"]')[0]
-        dict['cname'] = db_head.xpath('h1')[0].text
-        dict['ename'] = db_head.xpath('p[@class="db_enname"]')[0].text
-        dict['movieid'] = self.url
-        return dict
+        db_cover = self.page.xpath('//div[@class="db_cover __r_c_"]/a/img')
+        dict['cnname'] = db_head.xpath('h1')[0].text
+        dict['enname'] = db_head.xpath('p[@class="db_enname"]')[0].text
+        dict['img'] = db_cover[0].attrib['src']
+        self.d['info'] = [dict]
 
 class FullcreditsParse(Parse):
     '''
