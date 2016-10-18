@@ -92,7 +92,8 @@ class BasicInfoParse(Parse):
     def xpath(self):
         dict = {}
         db_head = self.page.xpath('//div[@class="db_head"]/div[@class="clearfix"]')[0]
-        db_cover = self.page.xpath('//div[@class="db_cover __r_c_"]/a/img')
+        db_cover = self.page.xpath('//div[@class="db_cover __r_c_"]')[0]
+        db_cover = db_cover.xpath('a/img|img')
         dict['cnname'] = db_head.xpath('h1')[0].text
         dict['enname'] = db_head.xpath('p[@class="db_enname"]')[0].text
         dict['img'] = db_cover[0].attrib['src']
