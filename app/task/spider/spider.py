@@ -192,5 +192,6 @@ def basic_spider(id):
                 BasicInfo(**obj_each).save()
     except Exception,e:
         print e
+        basic_spider(id)
 
 
