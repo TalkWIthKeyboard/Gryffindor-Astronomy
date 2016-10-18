@@ -94,8 +94,16 @@ class BasicInfoParse(Parse):
         db_head = self.page.xpath('//div[@class="db_head"]/div[@class="clearfix"]')[0]
         db_cover = self.page.xpath('//div[@class="db_cover __r_c_"]')[0]
         db_cover = db_cover.xpath('a/img|img')
-        dict['cnname'] = db_head.xpath('h1')[0].text
-        dict['enname'] = db_head.xpath('p[@class="db_enname"]')[0].text
+        cnname = db_head.xpath('h1')
+        if cnname:
+            dict['cnname'] = cnname[0].text
+        else:
+            dict['cnname'] = ''
+        enname = db_head.xpath('p[@class="db_enname"]')
+        if enname:
+            dict['enname'] = enname[0].text
+        else:
+            dict['enname'] = ''
         dict['img'] = db_cover[0].attrib['src']
         self.d['info'] = [dict]
 

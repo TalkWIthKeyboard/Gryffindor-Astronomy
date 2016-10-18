@@ -190,7 +190,7 @@ def basic_spider(id):
                 obj_each['info'] = each['info'][0]
                 obj_each['movieid'] = each['movieid']
                 BasicInfo(**obj_each).save()
-        pass
     except Exception,e:
         print e
+
 
