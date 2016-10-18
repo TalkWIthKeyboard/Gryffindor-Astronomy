@@ -61,7 +61,7 @@ def spider():
     num = 0
     for each in to_process:
         num += 1
-        print "开始第{}个电影的爬虫".format(num)
+        print "开始第{}个电影{}的爬虫".format(num,each)
         basic_spider(each)
         score_spider(each)
         fullcredits_spider(each)
@@ -73,7 +73,7 @@ def spider():
 
     # 这一年的任务已经完成
     YearFinished(year=y).save()
-    IdFinished(year=y, ids=y_list).save()
+    IdFinished(year=y, ids=to_process).save()
     print "完成爬取第{}年所有的电影信息".format(y)
     spider()
 
@@ -185,10 +185,11 @@ def basic_spider(id):
         spider = BasicInfoParse(id)
         ans = spider()
         for each in ans:
-            if each != None:
+            if each != False:
                 obj_each = {}
                 obj_each['info'] = each['info'][0]
                 obj_each['movieid'] = each['movieid']
                 BasicInfo(**obj_each).save()
+        pass
     except Exception,e:
         print e
