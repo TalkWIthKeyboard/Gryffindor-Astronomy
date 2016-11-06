@@ -29,7 +29,7 @@ def spider():
         YearFinished(year=y).save()
         sleep2()
         return spider()
-    pages = 1
+    
     if pages > 1:
         p = 2
         while p <= pages:
