@@ -13,6 +13,7 @@ def spider():
     '''
     y_list = []
     y = get_year() + 1
+    flag = False
 
     add_log('开始爬取第{}年所有的电影信息\n'.format(y),'spider','')
     instance = fetch(y, 1)
@@ -32,8 +33,8 @@ def spider():
     if pages > 1:
         p = 2
         while p <= pages:
+            flag = True
             instance = fetch(y, p)
-            add_log('开始爬取第{}年第{}页的电影信息\n'.format(y,p), 'spider', '')
             ids = get_movie_ids(instance)
             if ids is None:
                 continue
@@ -72,9 +73,12 @@ def spider():
         basic_spider(each)
 
     # 这一年的任务已经完成
-    YearFinished(year=y).save()
-    IdFinished(year=y, ids=to_process).save()
-    add_log('完成爬取第{}年所有的电影信息\n'.format(y), 'spider', '')
+    if flag:
+        YearFinished(year=y).save()
+        IdFinished(year=y, ids=to_process).save()
+        add_log('完成爬取第{}年所有的电影信息\n'.format(y), 'spider', '')
+    else:
+        add_log('爬取第{}年所有的电影信息失败，重新爬\n'.format(y), 'spider', '')
     spider()
 
 '''
