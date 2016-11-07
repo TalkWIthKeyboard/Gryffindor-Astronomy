@@ -26,7 +26,6 @@ def spider():
 
     y_list.extend(ids)
     if not y_list:
-        YearFinished(year=y).save()
         sleep2()
         return spider()
 
@@ -146,5 +145,4 @@ def basic_spider(id):
     except Exception,e:
         print e
         basic_spider(id)
-
 
