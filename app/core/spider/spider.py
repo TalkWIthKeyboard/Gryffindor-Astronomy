@@ -114,7 +114,6 @@ class Spider(object):
         try:
             self.content = urllib2.urlopen(req).read()
         except Exception,e:
-            print "因为{}原因被挡住了，换IP！！".format(e.message)
             self.fetch(url)
 
     @classmethod

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import render_template, request, jsonify, redirect, url_for
-from app.task.basic.config import TASK_STOP,TASK_RUNNING,TASK_HANG,SYSTEM_RUNNING,SYSTEM_STOP
+from config import TASK_STOP,TASK_RUNNING,TASK_HANG,SYSTEM_RUNNING,SYSTEM_STOP
 from flask_login import login_required
 import app.core.tools as tools
 from app.models.taskModel import Task

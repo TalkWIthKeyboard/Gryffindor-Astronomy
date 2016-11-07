@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 class Config(object):
     JOBS=[
 
@@ -27,7 +29,9 @@ class Config(object):
     ]
 
     MONGODB_SETTINGS={
-        'db':'Gryffindor-task',
+        'db':'Gryffindor-test',
         'hosts':'127.0.0.1',
         'port':27017
     }
+
+
