@@ -29,7 +29,7 @@ class Config(object):
     ]
 
     MONGODB_SETTINGS={
-        'db':'Gryffindor-task',
+        'db':'Gryffindor-test',
         'hosts':'127.0.0.1',
         'port':27017
     }
