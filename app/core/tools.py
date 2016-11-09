@@ -11,7 +11,6 @@ from app.models.logModel import Log
     全局公用部分
 '''
 scheduler = APScheduler()
-systemState = 0
 taskUrl = ""
 
 '''

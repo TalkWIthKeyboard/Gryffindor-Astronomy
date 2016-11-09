@@ -7,6 +7,7 @@ from flask_login import login_required
 import app.core.tools as tools
 from app.models.taskModel import Task
 from app.models.logModel import Log
+from app.models.systemModel import System
 from flask_login import current_user
 from app import app
 import datetime
@@ -29,7 +30,8 @@ def task_show():
     args = request.args
     page = int(args.get('page', 1))
     paginate = Task.objects.paginate(page=page, per_page=10)
-    return render_template('taskManage/taskManage.html', paginate=paginate,systemState=tools.systemState)
+    system = System.objects(key='systemState').first().to_dict()['value']
+    return render_template('taskManage/taskManage.html', paginate=paginate,systemState=system)
 
 @app.route('/taskManage/create',methods=['POST'])
 @login_required
@@ -116,7 +118,8 @@ def task_show_search():
         jobId = args.get('jobId','')
         page = int(args.get('page', 1))
         paginate = Task.objects(jobId__contains=jobId).paginate(page=page, per_page=10)
-        return render_template('taskManage/taskManage.html', paginate=paginate,systemState=tools.systemState)
+        system = System.objects(key='systemState').first().to_dict()['value']
+        return render_template('taskManage/taskManage.html', paginate=paginate,systemState=system)
     except Exception,e:
         return e
 
@@ -174,7 +177,11 @@ def system_start():
                 log.save()
                 each.isRunning = TASK_RUNNING
                 each.save()
-        tools.systemState = SYSTEM_RUNNING
+        # 系统状态改变
+        system = System.objects(key='systemState').first()
+        system.value = SYSTEM_RUNNING
+        system.save()
+        # 打log
         user = current_user
         log = Log(content='成功启动系统',
                   fromTask=user.userName,
@@ -200,7 +207,11 @@ def system_stop():
             log.save()
             each.isRunning = TASK_HANG
             each.save()
-        tools.systemState = SYSTEM_STOP
+        # 系统状态改变
+        system = System.objects(key='systemState').first()
+        system.value = SYSTEM_STOP
+        system.save()
+        # 打log
         user = current_user
         log = Log(content='成功关闭系统',
                   fromTask=user.userName,

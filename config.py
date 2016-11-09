@@ -18,7 +18,6 @@ SYSTEM_STOP = 0
 SYSTEM_RUNNING = 1
 
 
-
 '''
 爬虫常量
 '''
