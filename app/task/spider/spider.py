@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from app.models.spiderModel import YearFinished, IdFinished, Fullcredits, Plot, Scenes, Details, Awards, Comment, Score, BasicInfo
+from app.models.spiderModel import YearFinished, IdFinished, Fullcredits, Plot, Scenes, Details, Awards, Comment, Score, BasicInfo, AliasName
 from app.core.spider.parse import (get_movie_pages, get_movie_ids, get_movie_info,
                                    FullcreditsParse, PlotParse, ScenesParse, DetailsParse, AwardsParse, CommentParse, BasicInfoParse)
 from app.core.spider.basic import get_year, fetch
@@ -29,7 +29,6 @@ def spider():
         sleep2()
         return spider()
 
-    pages = 1
     if pages > 1:
         p = 2
         while p <= pages:
@@ -99,6 +98,15 @@ def spider_by_db_id(spider_class, db, id):
         for each in ans:
             if each != False:
                 db(**each).save()
+
+        if spider_class == FullcreditsParse:
+            alias = spider._alias.items()
+            for (k,v) in alias:
+                dict = {}
+                dict['name'] = k
+                dict['alias'] = list(v)
+                AliasName(**dict).save()
+
     except Exception,e:
         print e
 
@@ -147,5 +155,3 @@ def basic_spider(id):
         print e
         basic_spider(id)
 
-if __name__ == '__main__':
-    spider_by_db_id(FullcreditsParse,Fullcredits,22506)
