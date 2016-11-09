@@ -137,25 +137,27 @@ class FullcreditsParse(Parse):
                     name = match[1]
                 self.d[type[offset]] += [name]
 
-        # 导演信息
-        director = common[0]
-        img = director.xpath('div/a/img')
-        director_dict = {}
-        if img:
-            director_dict['poster'] = img[0].attrib['src']
-        try:
-            href = director.xpath('div/a')[0].attrib['href']
-            people = people_regex.findall(href)
-            # 导演id
-            director_dict['mid'] = people[0]
-        except IndexError:
-            pass
-        cn = director.xpath('div/h3/a')
-        if cn:
-            name = director.xpath('div/p/a')[0].text
-            director_dict['name'] = name
-            self._alias[name].add(cn[0].text)
-        self.d['director'] = [director_dict]
+        # 完整的导演信息
+        if not self.d.has_key('director'):
+            director = common[0]
+            img = director.xpath('div/a/img')
+            director_dict = {}
+            if img:
+                director_dict['poster'] = img[0].attrib['src']
+            try:
+                href = director.xpath('div/a')[0].attrib['href']
+                people = people_regex.findall(href)
+                # 导演id
+                director_dict['mid'] = people[0]
+            except IndexError:
+                pass
+            cn = director.xpath('div/h3/a')
+            if cn:
+                name = director.xpath('div/p/a')[0].text
+                director_dict['name'] = name
+                self._alias[name].add(cn[0].text)
+            self.d['director'] = [director_dict]
+
         # 演员信息
         self.get_actor()
 
@@ -172,29 +174,29 @@ class FullcreditsParse(Parse):
                 path = 'div[@class="actor_tit"]/'
                 name_path = 'div/div/h3'
                 href = a.xpath(path + 'h3/a')[0].attrib['href']
-        people = people_regex.findall(href)
-        one_actor['mid'] = people[0]
-        img = a.xpath(path + 'a/img')
-        if img:
-            one_actor['poster'] = img[0].attrib['src']
-        try:
-            name = a.xpath(path + 'h3/a')[0].text
-        except IndexError:
-            # 只有中文名
-            name = None
-        one_actor['name'] = name
-        cn = a.xpath(path + 'h3/a')
-        if cn:
-            cnname = cn[0].text
-            if name is None:
-                name = cnname
-            self._alias[name].add(cnname)
-        try:
-            play = a.xpath(name_path)[-1].text
-        except IndexError:
-            play = ''
-        one_actor['play'] = play
-        self.d['actor'] += [one_actor]
+            people = people_regex.findall(href)
+            one_actor['mid'] = people[0]
+            img = a.xpath(path + 'a/img')
+            if img:
+                one_actor['poster'] = img[0].attrib['src']
+            try:
+                name = a.xpath(path + 'p/a')[0].text
+            except IndexError:
+                # 只有中文名
+                name = None
+            one_actor['name'] = name
+            cn = a.xpath(path + 'h3/a')
+            if cn:
+                cnname = cn[0].text
+                if name is None:
+                    name = cnname
+                self._alias[name].add(cnname)
+            try:
+                play = a.xpath(name_path)[-1].text
+            except IndexError:
+                play = ''
+            one_actor['play'] = play
+            self.d['actor'] += [one_actor]
 
 class PlotParse(Parse):
     '''

@@ -145,4 +145,3 @@ def basic_spider(id):
     except Exception,e:
         print e
         basic_spider(id)
-
