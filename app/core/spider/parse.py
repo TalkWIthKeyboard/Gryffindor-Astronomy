@@ -134,8 +134,11 @@ class FullcreditsParse(Parse):
                 if match:
                     match = match[0]
                     self._alias[match[1]].add(match[0])
-                    name = match[1]
-                self.d[type[offset]] += [name]
+                    name = str(match[1])
+                if offset == 0:
+                    self.d[type[offset]] += [{'name':str(name)}]
+                else:
+                    self.d[type[offset]] += [str(name)]
 
         # 完整的导演信息
         if not self.d.has_key('director'):
@@ -154,7 +157,8 @@ class FullcreditsParse(Parse):
             cn = director.xpath('div/h3/a')
             if cn:
                 name = director.xpath('div/p/a')[0].text
-                director_dict['name'] = name
+                director_dict['name'] = str(name)
+                director_dict['cnname'] = str(cn)
                 self._alias[name].add(cn[0].text)
             self.d['director'] = [director_dict]
 
@@ -184,12 +188,12 @@ class FullcreditsParse(Parse):
             except IndexError:
                 # 只有中文名
                 name = None
-            one_actor['name'] = name
+            one_actor['name'] = str(name)
             cn = a.xpath(path + 'h3/a')
             if cn:
                 cnname = cn[0].text
                 if name is None:
-                    name = cnname
+                    one_actor['name'] = str(cnname)
                 self._alias[name].add(cnname)
             try:
                 play = a.xpath(name_path)[-1].text

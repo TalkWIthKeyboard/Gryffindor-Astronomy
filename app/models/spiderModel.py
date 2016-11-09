@@ -54,25 +54,22 @@ class Director(db.EmbeddedDocument):
     mid = db.IntField(default=0)  # 演员链接的唯一ID
     name = db.StringField(max_length=60)  # 导演名字
     cnname = db.StringField(max_length=60)  # 可能有中文翻译过来的名字
-    poster =db. StringField(max_length=100)  # 海报缩略图
+    poster = db.StringField(max_length=100)  # 海报缩略图
 
 class Fullcredits(db.Document, MtimeMixin):
     '''
         演职员表
     '''
     director = db.ListField(db.EmbeddedDocumentField(Director))  # 导演
-    writer = db.ListField(db.StringField(max_length=30, required=True))  # 编剧
+    writer = db.ListField(db.StringField(max_length=30))  # 编剧
     actor = db.ListField(db.EmbeddedDocumentField(Actor))  # 演员
-    produced = db.ListField(db.StringField(max_length=60, required=True))  # 制作人
-    originalmusic = db.ListField(
-        db.StringField(max_length=60, required=True))  # 原创音乐
-    cinematography = db.ListField(db.StringField(max_length=60, required=True))  # 摄影
-    filmediting = db.ListField(db.StringField(max_length=60, required=True))  # 剪辑
-    artdirection = db.ListField(db.StringField(max_length=60, required=True))  # 美术设计
-    costumedesign = db.ListField(
-        db.StringField(max_length=60, required=True))  # 服装设计
-    assistantdirector = db.ListField(
-        db.StringField(max_length=60, required=True))  # 副导演/助理导演
+    produced = db.ListField(db.StringField(max_length=60))  # 制作人
+    originalmusic = db.ListField(db.StringField(max_length=60))  # 原创音乐
+    cinematography = db.ListField(db.StringField(max_length=60))  # 摄影
+    filmediting = db.ListField(db.StringField(max_length=60))  # 剪辑
+    artdirection = db.ListField(db.StringField(max_length=60))  # 美术设计
+    costumedesign = db.ListField(db.StringField(max_length=60))  # 服装设计
+    assistantdirector = db.ListField(db.StringField(max_length=60))  # 副导演/助理导演
 
 
 class EmbeddedReleaseInfo(db.EmbeddedDocument):

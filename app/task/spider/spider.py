@@ -29,6 +29,7 @@ def spider():
         sleep2()
         return spider()
 
+    pages = 1
     if pages > 1:
         p = 2
         while p <= pages:
@@ -145,3 +146,6 @@ def basic_spider(id):
     except Exception,e:
         print e
         basic_spider(id)
+
+if __name__ == '__main__':
+    spider_by_db_id(FullcreditsParse,Fullcredits,22506)
