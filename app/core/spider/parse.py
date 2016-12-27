@@ -491,13 +491,11 @@ def get_movie_pages(instance):
         return max([int(i[1]) for i in
                     movie_page_regex.findall(instance.content)])
     except ValueError:
-        # 被反爬挡住了
         if mtime_vcodeValid_regex.search(instance.content):
             add_log("被反爬机制挡住了~~",
                     "SpiderSystem",
                     "")
-            return
-        #只有一页
+            return None
         return 1
 
 
@@ -509,7 +507,7 @@ def get_movie_ids(instance):
         add_log("被反爬机制挡住了~~",
                 "SpiderSystem",
                 "")
-        return
+        return None
     return movie_regex.findall(instance.content)
 
 

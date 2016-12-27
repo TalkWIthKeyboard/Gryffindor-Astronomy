@@ -41,7 +41,6 @@ def spider():
             p += 1
             sleep2()
 
-    # 感觉应该是all
     obj = IdFinished.objects(year=y).first()
     if obj is not None:
         has_finished = obj.ids
@@ -65,7 +64,7 @@ def spider():
         spider_by_db_id(ScenesParse, Scenes, each)
         # 获奖情况爬虫
         spider_by_db_id(AwardsParse, Awards, each)
-        #  电影评论爬虫
+        # 电影评论爬虫
         spider_by_db_id(CommentParse, Comment, each)
         details_spider(each)
         score_spider(each)

@@ -27,13 +27,16 @@ def checkIP(ip,port):
 def makeProxies():
     '''
         爬虫可使用的IP构造proxies池
+       （每天重新爬虫一次）
     '''
+
+    # 先把库清空一下
     Ip.drop_collection()
+
+    # 开始爬虫
     User_Agent = 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0'
     header = {}
     header['User-Agent'] = User_Agent
-
-    # 这个代理网站基本只有第一页的能用
     url = 'http://www.xicidaili.com/nn/1'
     req = urllib2.Request(url,headers=header)
     html = urllib2.urlopen(req).read()
@@ -57,5 +60,7 @@ def makeProxies():
             print "第{}个IP不能用！！".format(each)
 
     print "proxies的构建完成"
+
+
 
 
