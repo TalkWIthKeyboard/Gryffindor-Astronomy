@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import render_template, request, jsonify, redirect, url_for
-from config import TASK_STOP,TASK_RUNNING,TASK_HANG,SYSTEM_RUNNING,SYSTEM_STOP
+from config import TASK_STOP, TASK_RUNNING, TASK_HANG, SYSTEM_RUNNING, SYSTEM_STOP
 from flask_login import login_required
 import app.core.tools as tools
 from app.models.taskModel import Task
@@ -20,20 +20,23 @@ reload(sys)
 
 sys.setdefaultencoding('utf8')
 
-@app.route('/',methods=['GET'])
+
+@app.route('/', methods=['GET'])
 def init():
     return redirect(url_for('admin'))
 
-@app.route('/taskManage/taskShow',methods=['GET'])
+
+@app.route('/taskManage/taskShow', methods=['GET'])
 @login_required
 def task_show():
     args = request.args
     page = int(args.get('page', 1))
     paginate = Task.objects.paginate(page=page, per_page=10)
     system = System.objects(key='systemState').first().to_dict()['value']
-    return render_template('taskManage/taskManage.html', paginate=paginate,systemState=system)
+    return render_template('taskManage/taskManage.html', paginate=paginate, systemState=system)
 
-@app.route('/taskManage/create',methods=['POST'])
+
+@app.route('/taskManage/create', methods=['POST'])
 @login_required
 def task_create():
     if request.method == 'POST':
@@ -49,15 +52,16 @@ def task_create():
             task.save()
             user = current_user
             log = Log(content='创建编号为 ' + str(task.jobId) + ' 的任务',
-                      fromTask=user.userName,
+                      fromTask=user.nickName,
                       parameter='',
                       createTime=datetime.datetime.now())
             log.save()
-        except Exception,e:
+        except Exception, e:
             return jsonify(dict(success=False))
         return jsonify(dict(success=True))
 
-@app.route('/taskManage/update/<string:id>',methods=['PUT'])
+
+@app.route('/taskManage/update/<string:id>', methods=['PUT'])
 @login_required
 def task_update(id):
     if request.method == 'PUT':
@@ -73,15 +77,16 @@ def task_update(id):
             task.save()
             user = current_user
             log = Log(content='修改任务 ' + str(task.jobId) + ' 的信息',
-                      fromTask=user.userName,
+                      fromTask=user.nickName,
                       parameter='',
                       createTime=datetime.datetime.now())
             log.save()
-        except Exception,e:
+        except Exception, e:
             return jsonify(dict(success=False))
         return jsonify(dict(success=True))
 
-@app.route('/taskManage/getInfo/<string:id>',methods=['GET'])
+
+@app.route('/taskManage/getInfo/<string:id>', methods=['GET'])
 @login_required
 def task_getInfo(id):
     try:
@@ -89,41 +94,44 @@ def task_getInfo(id):
         taskDict = task.to_dict()
         taskDict["_id"] = str(taskDict["_id"])
         return jsonify(taskDict)
-    except Exception,e:
+    except Exception, e:
         return jsonify(dict(success=False))
 
-@app.route('/taskManage/delete/<string:id>',methods=['DELETE'])
+
+@app.route('/taskManage/delete/<string:id>', methods=['DELETE'])
 @login_required
 def task_delete(id):
     try:
         task = Task.objects(_id=id).first()
         user = current_user
         log = Log(content='删除编号为 ' + str(task.jobId) + ' 的任务',
-                  fromTask=user.userName,
+                  fromTask=user.nickName,
                   parameter='',
                   createTime=datetime.datetime.now())
         log.save()
         if task.isRunning == TASK_RUNNING:
             tools.scheduler.delete_job(str(task['jobId']))
         Task.objects(_id=id).delete()
-    except Exception,e:
+    except Exception, e:
         return jsonify(dict(success=False))
     return jsonify(dict(success=True))
 
-@app.route('/taskManage/taskShow/search',methods=['GET'])
+
+@app.route('/taskManage/taskShow/search', methods=['GET'])
 @login_required
 def task_show_search():
     try:
         args = request.args
-        jobId = args.get('jobId','')
+        jobId = args.get('jobId', '')
         page = int(args.get('page', 1))
         paginate = Task.objects(jobId__contains=jobId).paginate(page=page, per_page=10)
         system = System.objects(key='systemState').first().to_dict()['value']
-        return render_template('taskManage/taskManage.html', paginate=paginate,systemState=system)
-    except Exception,e:
+        return render_template('taskManage/taskManage.html', paginate=paginate, systemState=system)
+    except Exception, e:
         return e
 
-@app.route('/taskManage/startTask/<string:id>',methods=['GET'])
+
+@app.route('/taskManage/startTask/<string:id>', methods=['GET'])
 @login_required
 def task_start(id):
     try:
@@ -133,15 +141,16 @@ def task_start(id):
         task.save()
         user = current_user
         log = Log(content='启动编号为 ' + str(task.jobId) + ' 的任务',
-                  fromTask=user.userName,
+                  fromTask=user.nickName,
                   parameter='',
                   createTime=datetime.datetime.now())
         log.save()
-    except Exception,e:
+    except Exception, e:
         return jsonify(dict(success=False))
     return jsonify(dict(sucess=True))
 
-@app.route('/taskManage/stopTask/<string:id>',methods=['GET'])
+
+@app.route('/taskManage/stopTask/<string:id>', methods=['GET'])
 @login_required
 def task_stop(id):
     try:
@@ -151,15 +160,16 @@ def task_stop(id):
         task.save()
         user = current_user
         log = Log(content='暂停编号为 ' + str(task.jobId) + ' 的任务',
-                  fromTask=user.userName,
+                  fromTask=user.nickName,
                   parameter='',
                   createTime=datetime.datetime.now())
         log.save()
-    except Exception,e:
+    except Exception, e:
         return jsonify(dict(success=False))
     return jsonify(dict(sucess=True))
 
-@app.route('/taskManage/startSystem',methods=['GET'])
+
+@app.route('/taskManage/startSystem', methods=['GET'])
 @login_required
 def system_start():
     try:
@@ -184,16 +194,17 @@ def system_start():
         # 打log
         user = current_user
         log = Log(content='成功启动系统',
-                  fromTask=user.userName,
+                  fromTask=user.nickName,
                   parameter='',
                   createTime=datetime.datetime.now())
         log.save()
-    except Exception,e:
+    except Exception, e:
         print e
     time.sleep(1)
     return redirect(url_for("task_show"))
 
-@app.route('/taskManage/stopSystem',methods=['GET'])
+
+@app.route('/taskManage/stopSystem', methods=['GET'])
 @login_required
 def system_stop():
     try:
@@ -214,14 +225,11 @@ def system_stop():
         # 打log
         user = current_user
         log = Log(content='成功关闭系统',
-                  fromTask=user.userName,
+                  fromTask=user.nickName,
                   parameter='',
                   createTime=datetime.datetime.now())
         log.save()
-    except Exception,e:
+    except Exception, e:
         print e
     time.sleep(1)
     return redirect(url_for("task_show"))
-
-
-

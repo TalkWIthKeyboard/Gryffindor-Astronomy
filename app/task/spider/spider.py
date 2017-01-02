@@ -1,11 +1,14 @@
 # coding=utf-8
 
-from app.models.spiderModel import YearFinished, IdFinished, Fullcredits, Plot, Scenes, Details, Awards, Comment, Score, BasicInfo, AliasName
+from app.models.spiderModel import YearFinished, IdFinished, Fullcredits, Plot, Scenes, Details, Awards, Comment, Score, \
+    BasicInfo, AliasName
 from app.core.spider.parse import (get_movie_pages, get_movie_ids, get_movie_info,
-                                   FullcreditsParse, PlotParse, ScenesParse, DetailsParse, AwardsParse, CommentParse, BasicInfoParse)
+                                   FullcreditsParse, PlotParse, ScenesParse, DetailsParse, AwardsParse, CommentParse,
+                                   BasicInfoParse)
 from app.core.spider.basic import get_year, fetch
 from app.core.spider.tools import get_unfinished, sleep2
 from app.core.tools import add_log
+
 
 def spider():
     '''
@@ -15,7 +18,7 @@ def spider():
     y = get_year() + 1
     flag = False
 
-    add_log('开始爬取第{}年所有的电影信息\n'.format(y),'spider','')
+    add_log('开始爬取第{}年所有的电影信息\n'.format(y), 'spider', '')
     instance = fetch(y, 1)
     pages = get_movie_pages(instance)
     if pages is None:
@@ -79,10 +82,12 @@ def spider():
         add_log('爬取第{}年所有的电影信息失败，重新爬\n'.format(y), 'spider', '')
     spider()
 
+
 '''
     模块爬虫任务
     （方便主爬虫函数直接调用，也方便后面改为多线程）
 '''
+
 
 def spider_by_db_id(spider_class, db, id):
     '''
@@ -100,14 +105,15 @@ def spider_by_db_id(spider_class, db, id):
 
         if spider_class == FullcreditsParse:
             alias = spider._alias.items()
-            for (k,v) in alias:
+            for (k, v) in alias:
                 dict = {}
                 dict['name'] = k
                 dict['alias'] = list(v)
                 AliasName(**dict).save()
 
-    except Exception,e:
+    except Exception, e:
         print e
+
 
 def details_spider(id):
     '''
@@ -124,8 +130,9 @@ def details_spider(id):
                     if detail_each != False:
                         detail_each['movieid'] = movieid
                         Details(**detail_each).save()
-    except Exception,e:
+    except Exception, e:
         print e
+
 
 def score_spider(id):
     '''
@@ -134,8 +141,9 @@ def score_spider(id):
     try:
         score = get_movie_info(id)
         Score(**score).save()
-    except Exception,e:
+    except Exception, e:
         print e
+
 
 def basic_spider(id):
     '''
@@ -150,7 +158,6 @@ def basic_spider(id):
                 obj_each['info'] = each['info'][0]
                 obj_each['movieid'] = each['movieid']
                 BasicInfo(**obj_each).save()
-    except Exception,e:
+    except Exception, e:
         print e
         basic_spider(id)
-
