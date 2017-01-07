@@ -7,7 +7,9 @@ from app.core.spider.parse import (get_movie_pages, get_movie_ids, get_movie_inf
                                    BasicInfoParse)
 from app.core.spider.basic import get_year, fetch
 from app.core.spider.tools import get_unfinished, sleep2
+from app.core import tools
 from app.core.tools import add_log
+from proxy import makeProxies
 
 
 def spider():
@@ -77,6 +79,9 @@ def spider():
     if flag:
         YearFinished(year=y).save()
         IdFinished(year=y, ids=to_process).save()
+        tools.scheduler.pause_job('job3')
+        makeProxies()
+        tools.scheduler.resume_job('job3')
         add_log('完成爬取第{}年所有的电影信息\n'.format(y), 'spider', '')
     else:
         add_log('爬取第{}年所有的电影信息失败，重新爬\n'.format(y), 'spider', '')

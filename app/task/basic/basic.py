@@ -56,6 +56,7 @@ def delete_task():
 
 def job3(a, b):
     answer = '>>>>>>>>>>job3带参数测试' + str(a) + ' ' + str(b) + '<<<<<<<<<<'
+    print answer
     add_log('job3任务执行成功,输出: ' + answer,
             'system',
             '')

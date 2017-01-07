@@ -9,12 +9,13 @@ app.secret_key = 'taskProject'
 db = MongoEngine(app)
 loginManager = LoginManager()
 loginManager.init_app(app)
-loginManager.login_view='admin_login'
+loginManager.login_view = 'admin_login'
 
 from app.models.adminModel import User
 from app.routes import taskManageRoute
 from app.routes import logRoute
 from app.routes import adminRoute
+
 
 @loginManager.user_loader
 def load_user(id):

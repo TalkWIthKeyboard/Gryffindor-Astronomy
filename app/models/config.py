@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 class Config(object):
-    JOBS=[
+    JOBS = [
 
         # 开启任务扫描(添加到任务列表)
         {
-            'id' : 'job1',
-            'func' : 'app.task.basic.basic:add_task',
-            'args' : (),
-            'trigger' : {
-                'type' : 'interval',
-                'seconds' : 1
+            'id': 'job1',
+            'func': 'app.task.basic.basic:add_task',
+            'args': (),
+            'trigger': {
+                'type': 'interval',
+                'seconds': 1
             }
         },
 
@@ -28,10 +26,8 @@ class Config(object):
         }
     ]
 
-    MONGODB_SETTINGS={
-        'db':'Gryffindor-test',
-        'hosts':'127.0.0.1',
-        'port':27017
+    MONGODB_SETTINGS = {
+        'db': 'Gryffindor-test',
+        'hosts': '127.0.0.1',
+        'port': 27017
     }
-
-

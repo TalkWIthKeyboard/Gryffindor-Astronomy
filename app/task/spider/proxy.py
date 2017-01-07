@@ -5,21 +5,23 @@ import urllib2
 import socket
 from lxml import etree
 from app.models.ipModel import Ip
-import random
-
+from app.core import tools
+from app.models.logModel import Log
+import datetime
 
 socket.setdefaulttimeout(3)
 test_url = "http://ip.chinaz.com/getip.aspx"
 
-def checkIP(ip,port):
+
+def checkIP(ip, port):
     '''
         检测这个代理ip是否可用
     '''
-    proxy = {"http":"http://" + ip + ":" + port}
+    proxy = {"http": "http://" + ip + ":" + port}
     try:
-        res = urllib.urlopen(test_url,proxies=proxy).read()
+        res = urllib.urlopen(test_url, proxies=proxy).read()
         return True
-    except Exception,e:
+    except Exception, e:
         print "这个代理不能用，错误信息：{}".format(e.message)
         return False
 
@@ -30,7 +32,6 @@ def makeProxies():
        （每天重新爬虫一次）
     '''
 
-    # 先把库清空一下
     Ip.drop_collection()
 
     # 开始爬虫
@@ -38,7 +39,7 @@ def makeProxies():
     header = {}
     header['User-Agent'] = User_Agent
     url = 'http://www.xicidaili.com/nn/1'
-    req = urllib2.Request(url,headers=header)
+    req = urllib2.Request(url, headers=header)
     html = urllib2.urlopen(req).read()
     text = etree.HTML(html.decode('utf-8'))
 
@@ -49,8 +50,8 @@ def makeProxies():
     port = text.xpath('//tr/td[3]')
     date = text.xpath('//tr/td[last()]')
 
-    for each in range(0,len(ip)):
-        if (checkIP(ip[each].text,port[each].text)):
+    for each in range(0, len(ip)):
+        if (checkIP(ip[each].text, port[each].text)):
             save_ip = Ip(ip=ip[each].text,
                          port=port[each].text,
                          date=date[each].text)
@@ -61,6 +62,9 @@ def makeProxies():
 
     print "proxies的构建完成"
 
-
-
-
+    # 记录log
+    log = Log(content='proxies的构建完成',
+              fromTask='系统',
+              parameter='',
+              createTime=datetime.datetime.now())
+    log.save()
