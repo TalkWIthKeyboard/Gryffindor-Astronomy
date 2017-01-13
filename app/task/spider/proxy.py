@@ -5,7 +5,6 @@ import urllib2
 import socket
 from lxml import etree
 from app.models.ipModel import Ip
-from app.core import tools
 from app.models.logModel import Log
 import datetime
 import socket
@@ -37,7 +36,7 @@ def makeProxies():
     socket.setdefaulttimeout(1)
 
     # 开始爬虫
-    for index in range(1, 2):
+    for index in range(1, 3):
         User_Agent = 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0'
         header = {}
         header['User-Agent'] = User_Agent
