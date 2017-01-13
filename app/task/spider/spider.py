@@ -31,10 +31,8 @@ def spider():
             continue
         y_list.extend(ids)
         if not y_list:
-            sleep2()
             continue
 
-    pages = 1
     if pages > 1:
         p = 2
         while p <= pages:
@@ -45,7 +43,6 @@ def spider():
                 continue
             y_list.extend(ids)
             p += 1
-            sleep2()
 
     obj = IdFinished.objects(year=y).first()
     if obj is not None:
