@@ -43,6 +43,7 @@ def spider():
                 continue
             y_list.extend(ids)
             p += 1
+            print "现在是第{}页".format(p)
 
     obj = IdFinished.objects(year=y).first()
     if obj is not None:

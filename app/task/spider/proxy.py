@@ -19,7 +19,7 @@ def checkIP(ip, port):
     '''
     proxy = {"http": "http://" + ip + ":" + port}
     try:
-        res = urllib.urlopen(test_url, proxies=proxy).read()
+        res = urllib.urlopen(test_url, proxies=proxy, timeout=3).read()
         return True
     except Exception, e:
         print "这个代理不能用，错误信息：{}".format(e.message)
@@ -40,7 +40,7 @@ def makeProxies():
     header['User-Agent'] = User_Agent
     url = 'http://www.xicidaili.com/nn/1'
     req = urllib2.Request(url, headers=header)
-    html = urllib2.urlopen(req).read()
+    html = urllib2.urlopen(req, timeout=3).read()
     text = etree.HTML(html.decode('utf-8'))
 
     '''
