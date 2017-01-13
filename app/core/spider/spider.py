@@ -114,7 +114,7 @@ class Spider(object):
                 url = '{}?{}'.format(url, params)
             req = urllib2.Request(url)
             try:
-                self.content = urllib2.urlopen(req, timeout=30).read()
+                self.content = urllib2.urlopen(req).read()
                 flag = True
             except Exception, e:
                 self.fetch(url)

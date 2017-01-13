@@ -7,7 +7,6 @@ from lxml import etree
 from app.models.ipModel import Ip
 from app.models.logModel import Log
 import datetime
-import socket
 
 socket.setdefaulttimeout(3)
 test_url = "http://ip.chinaz.com/getip.aspx"
@@ -33,7 +32,6 @@ def makeProxies():
     '''
 
     Ip.drop_collection()
-    socket.setdefaulttimeout(1)
 
     # 开始爬虫
     for index in range(1, 3):
@@ -42,7 +40,7 @@ def makeProxies():
         header['User-Agent'] = User_Agent
         url = 'http://www.xicidaili.com/nn/{}'.format(index)
         req = urllib2.Request(url, headers=header)
-        html = urllib2.urlopen(req, timeout=3).read()
+        html = urllib2.urlopen(req).read()
         text = etree.HTML(html.decode('utf-8'))
 
         '''

@@ -34,6 +34,7 @@ def spider():
         if not y_list:
             continue
 
+    pages = 1
     if pages > 1:
         p = 2
         while p <= pages:
