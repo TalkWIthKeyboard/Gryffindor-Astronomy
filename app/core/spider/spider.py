@@ -97,24 +97,28 @@ class Spider(object):
 
 
     def fetch(self,url):
-        proxy = self.make_proxy()
-        proxydict = {'http':'http://{}:{}'.format(proxy['ip'],proxy['port'])}
-        proxy_handler = urllib2.ProxyHandler(proxydict)
-        opener = urllib2.build_opener(
-            ContentEncodingProcessor(self.cookie_support,
-                                     self.additional_headers),
-            urllib2.HTTPHandler,
-            proxy_handler
-        )
-        urllib2.install_opener(opener)
-        params = urllib.urlencode(self.make_query())
-        if params:
-            url = '{}?{}'.format(url, params)
-        req = urllib2.Request(url)
-        try:
-            self.content = urllib2.urlopen(req, timeout=3).read()
-        except Exception,e:
-            self.fetch(url)
+        flag = False
+        while not flag:
+            proxy = self.make_proxy()
+            proxydict = {'http':'http://{}:{}'.format(proxy['ip'],proxy['port'])}
+            proxy_handler = urllib2.ProxyHandler(proxydict)
+            opener = urllib2.build_opener(
+                ContentEncodingProcessor(self.cookie_support,
+                                         self.additional_headers),
+                urllib2.HTTPHandler,
+                proxy_handler
+            )
+            urllib2.install_opener(opener)
+            params = urllib.urlencode(self.make_query())
+            if params:
+                url = '{}?{}'.format(url, params)
+            req = urllib2.Request(url)
+            try:
+                self.content = urllib2.urlopen(req, timeout=3).read()
+                flag = True
+            except Exception, e:
+                print e.message
+                self.fetch(url)
 
     @classmethod
     def get_timestamp(cls):

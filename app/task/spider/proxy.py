@@ -8,6 +8,7 @@ from app.models.ipModel import Ip
 from app.core import tools
 from app.models.logModel import Log
 import datetime
+import socket
 
 socket.setdefaulttimeout(3)
 test_url = "http://ip.chinaz.com/getip.aspx"
@@ -19,7 +20,7 @@ def checkIP(ip, port):
     '''
     proxy = {"http": "http://" + ip + ":" + port}
     try:
-        res = urllib.urlopen(test_url, proxies=proxy, timeout=3).read()
+        res = urllib.urlopen(test_url, proxies=proxy).read()
         return True
     except Exception, e:
         print "这个代理不能用，错误信息：{}".format(e.message)
@@ -33,38 +34,40 @@ def makeProxies():
     '''
 
     Ip.drop_collection()
+    socket.setdefaulttimeout(1)
 
     # 开始爬虫
-    User_Agent = 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0'
-    header = {}
-    header['User-Agent'] = User_Agent
-    url = 'http://www.xicidaili.com/nn/1'
-    req = urllib2.Request(url, headers=header)
-    html = urllib2.urlopen(req, timeout=3).read()
-    text = etree.HTML(html.decode('utf-8'))
+    for index in range(1, 2):
+        User_Agent = 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0'
+        header = {}
+        header['User-Agent'] = User_Agent
+        url = 'http://www.xicidaili.com/nn/{}'.format(index)
+        req = urllib2.Request(url, headers=header)
+        html = urllib2.urlopen(req, timeout=3).read()
+        text = etree.HTML(html.decode('utf-8'))
 
-    '''
-        parse
-    '''
-    ip = text.xpath('//tr/td[2]')
-    port = text.xpath('//tr/td[3]')
-    date = text.xpath('//tr/td[last()]')
+        '''
+            parse
+        '''
+        ip = text.xpath('//tr/td[2]')
+        port = text.xpath('//tr/td[3]')
+        date = text.xpath('//tr/td[last()]')
 
-    for each in range(0, len(ip)):
-        if (checkIP(ip[each].text, port[each].text)):
-            save_ip = Ip(ip=ip[each].text,
-                         port=port[each].text,
-                         date=date[each].text)
-            save_ip.save()
-            print "存储第{}个IP".format(each)
-        else:
-            print "第{}个IP不能用！！".format(each)
+        for each in range(0, len(ip)):
+            if (checkIP(ip[each].text, port[each].text)):
+                save_ip = Ip(ip=ip[each].text,
+                             port=port[each].text,
+                             date=date[each].text)
+                save_ip.save()
+                print "存储第{}个IP".format(each)
+            else:
+                print "第{}个IP不能用！！".format(each)
 
-    print "proxies的构建完成"
+        print "proxies的构建完成"
 
-    # 记录log
-    log = Log(content='proxies的构建完成',
-              fromTask='系统',
-              parameter='',
-              createTime=datetime.datetime.now())
-    log.save()
+        # 记录log
+        log = Log(content='proxies的构建完成',
+                  fromTask='系统',
+                  parameter='',
+                  createTime=datetime.datetime.now())
+        log.save()

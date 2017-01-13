@@ -22,6 +22,7 @@ def spider():
 
     while not y_list:
         add_log('开始爬取第{}年所有的电影信息\n'.format(y), 'spider', '')
+        print '开始爬取第{}年所有的电影信息\n'.format(y)
         instance = fetch(y, 1)
         pages = get_movie_pages(instance)
         if pages is None:
