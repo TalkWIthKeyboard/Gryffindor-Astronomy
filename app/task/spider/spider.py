@@ -20,20 +20,21 @@ def spider():
     y = get_year() + 1
     flag = False
 
-    add_log('开始爬取第{}年所有的电影信息\n'.format(y), 'spider', '')
-    instance = fetch(y, 1)
-    pages = get_movie_pages(instance)
-    if pages is None:
-        return spider()
-    ids = get_movie_ids(instance)
-    if ids is None:
-        return spider()
+    while not y_list:
+        add_log('开始爬取第{}年所有的电影信息\n'.format(y), 'spider', '')
+        instance = fetch(y, 1)
+        pages = get_movie_pages(instance)
+        if pages is None:
+            continue
+        ids = get_movie_ids(instance)
+        if ids is None:
+            continue
+        y_list.extend(ids)
+        if not y_list:
+            sleep2()
+            continue
 
-    y_list.extend(ids)
-    if not y_list:
-        sleep2()
-        return spider()
-
+    pages = 1
     if pages > 1:
         p = 2
         while p <= pages:
@@ -166,3 +167,6 @@ def basic_spider(id):
     except Exception, e:
         print e
         basic_spider(id)
+
+if __name__ == '__main__':
+    spider()
